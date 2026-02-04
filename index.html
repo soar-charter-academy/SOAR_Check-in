@@ -343,6 +343,7 @@
             cursor: pointer;
             transition: all 0.2s;
             min-height: 60px;
+            position: relative;
         }
         
         .student-checkbox.selected {
@@ -352,6 +353,41 @@
         
         .student-checkbox:active {
             transform: scale(0.98);
+        }
+        
+        .student-remove-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #FEE;
+            color: #C33;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .student-checkbox:hover .student-remove-btn {
+            opacity: 1;
+        }
+        
+        .student-remove-btn:hover {
+            background: #FCC;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .student-remove-btn:active {
+            transform: translateY(-50%) scale(0.95);
         }
         
         .checkbox {
@@ -1252,6 +1288,47 @@
             showScreen('setupScreen');
         }
 
+        async function removeStudent(studentId, studentName) {
+            // Confirm removal
+            const confirmed = confirm(`Remove ${studentName} from your account?\n\nYou can always add them back later.`);
+            
+            if (!confirmed) return;
+            
+            // Remove from array
+            const index = userLinkedStudents.indexOf(studentId);
+            if (index > -1) {
+                userLinkedStudents.splice(index, 1);
+            }
+            
+            // Also deselect if currently selected
+            const selectedIndex = selectedStudentIds.indexOf(studentId);
+            if (selectedIndex > -1) {
+                selectedStudentIds.splice(selectedIndex, 1);
+            }
+            
+            // Update Firebase
+            try {
+                await db.ref(`users/${currentUser.uid}`).update({
+                    linkedStudents: userLinkedStudents
+                });
+                
+                // Re-render
+                renderStudentCheckboxes();
+                updateEventLabel();
+                
+                // If no students left, go to setup screen
+                if (userLinkedStudents.length === 0) {
+                    showSetupScreen();
+                }
+            } catch (error) {
+                console.error('Error removing student:', error);
+                showError('Failed to remove student. Please try again.');
+                // Restore student on error
+                userLinkedStudents.push(studentId);
+                renderStudentCheckboxes();
+            }
+        }
+
         function renderStudentCheckboxes() {
             const container = document.getElementById('studentCheckboxes');
             const linkedStudents = allStudents.filter(s => userLinkedStudents.includes(s.id));
@@ -1262,6 +1339,11 @@
                         <div class="student-checkbox-name">${student.firstName} ${student.lastName}</div>
                         <div class="student-checkbox-grade">Grade ${student.grade}</div>
                     </div>
+                    <button class="student-remove-btn" 
+                            onclick="event.stopPropagation(); removeStudent('${student.id}', '${student.firstName} ${student.lastName}')"
+                            title="Remove student from your account">
+                        ×
+                    </button>
                 </div>
             `).join('');
         }
