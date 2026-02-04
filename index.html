@@ -1299,12 +1299,12 @@
                     
                     if (studentsToCheckIn.length === 0) {
                         // All students already checked in
-                        showError(`${names} ${wasWere} already checked in today!`);
+                        alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
                         showCheckinScreen();
                         return;
                     } else {
-                        // Some checked in, some not - show info but continue with others
-                        console.log(`Note: ${names} ${wasWere} already checked in today`);
+                        // Some checked in, some not - show alert but continue with others
+                        alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
                     }
                 }
                 
