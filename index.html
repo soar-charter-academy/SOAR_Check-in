@@ -418,6 +418,14 @@
             min-height: 68px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .event-card.pinned {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(233, 147, 78, 0.15);
         }
         
         .event-card:active {
@@ -435,6 +443,44 @@
             font-weight: 600;
             color: var(--text);
             font-size: 1.1rem;
+            flex: 1;
+        }
+        
+        .pin-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+        
+        .pin-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .pin-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .pin-btn.pinned {
+            color: var(--accent);
+        }
+        
+        .pin-btn.unpinned {
+            color: var(--text-light);
+            opacity: 0.4;
+        }
+        
+        .event-card:hover .pin-btn.unpinned {
+            opacity: 1;
         }
         
         .user-info {
@@ -823,6 +869,7 @@
         let allEvents = [];
         let selectedStudentsList = [];
         let userLinkedStudents = [];
+        let pinnedEvents = [];
         let selectedStudentIds = [];
 
         // Cache management
@@ -942,6 +989,7 @@
 
             if (userData && userData.linkedStudents && userData.linkedStudents.length > 0) {
                 userLinkedStudents = userData.linkedStudents;
+                pinnedEvents = userData.pinnedEvents || [];
                 showCheckinScreen();
             } else {
                 showSetupScreen();
@@ -1177,7 +1225,8 @@
             try {
                 await db.ref(`users/${currentUser.uid}`).set({
                     email: currentUser.email,
-                    linkedStudents: studentIds
+                    linkedStudents: studentIds,
+                    pinnedEvents: pinnedEvents
                 });
                 userLinkedStudents = studentIds;
                 showCheckinScreen();
@@ -1250,27 +1299,69 @@
             const eventGrid = document.getElementById('eventGrid');
             const searchLower = filterText.toLowerCase().trim();
             
-            const filteredEvents = allEvents
+            let filteredEvents = allEvents
                 .filter(event => event.active !== false)
                 .filter(event => {
                     if (!searchLower) return true;
                     return event.name.toLowerCase().includes(searchLower);
                 });
             
+            // Sort: pinned events first, then alphabetically
+            filteredEvents.sort((a, b) => {
+                const aIsPinned = pinnedEvents.includes(a.id);
+                const bIsPinned = pinnedEvents.includes(b.id);
+                
+                if (aIsPinned && !bIsPinned) return -1;
+                if (!aIsPinned && bIsPinned) return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
             if (filteredEvents.length === 0 && searchLower) {
                 eventGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-light);">No events match your search</div>';
             } else {
                 eventGrid.innerHTML = filteredEvents
-                    .map(event => `
-                        <div class="event-card" onclick="checkIn('${event.id}')">
-                            <div class="event-name">${event.name}</div>
-                        </div>
-                    `).join('');
+                    .map(event => {
+                        const isPinned = pinnedEvents.includes(event.id);
+                        const starIcon = isPinned ? '⭐' : '☆';
+                        return `
+                            <div class="event-card ${isPinned ? 'pinned' : ''}" onclick="checkIn('${event.id}')">
+                                <div class="event-name">${event.name}</div>
+                                <button class="pin-btn ${isPinned ? 'pinned' : 'unpinned'}" 
+                                        onclick="event.stopPropagation(); togglePin('${event.id}')"
+                                        title="${isPinned ? 'Unpin event' : 'Pin event to top'}">
+                                    ${starIcon}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
             }
             updateEventCards();
         }
 
         function filterEvents() {
+            const searchInput = document.getElementById('eventSearch');
+            renderEventCards(searchInput.value);
+        }
+
+        async function togglePin(eventId) {
+            const index = pinnedEvents.indexOf(eventId);
+            
+            if (index > -1) {
+                // Unpin
+                pinnedEvents.splice(index, 1);
+            } else {
+                // Pin
+                pinnedEvents.push(eventId);
+            }
+            
+            // Save to Firebase
+            try {
+                await db.ref(`users/${currentUser.uid}/pinnedEvents`).set(pinnedEvents);
+            } catch (error) {
+                console.error('Error saving pinned events:', error);
+            }
+            
+            // Re-render events
             const searchInput = document.getElementById('eventSearch');
             renderEventCards(searchInput.value);
         }
