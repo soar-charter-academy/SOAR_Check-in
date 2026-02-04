@@ -752,10 +752,12 @@
             <div class="form-group">
                 <label>Select Student(s)</label>
                 <div id="studentCheckboxes"></div>
+                <button class="btn btn-secondary" onclick="addMoreStudents()" style="margin-top: 16px;">+ Add More Students</button>
             </div>
 
             <div class="form-group">
                 <label id="eventLabel">Select students first</label>
+                <input type="text" id="eventSearch" placeholder="Search events..." style="margin-bottom: 16px;" oninput="filterEvents()">
                 <div id="eventGrid" class="event-grid"></div>
             </div>
         </div>
@@ -1190,7 +1192,15 @@
             renderStudentCheckboxes();
             renderEventCards();
             document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('eventSearch').value = ''; // Clear event search
             showScreen('checkinScreen');
+        }
+
+        function addMoreStudents() {
+            // Reset the setup screen to allow adding more students
+            selectedStudentsList = allStudents.filter(s => userLinkedStudents.includes(s.id));
+            updateSelectedStudents();
+            showScreen('setupScreen');
         }
 
         function renderStudentCheckboxes() {
@@ -1236,16 +1246,33 @@
             label.textContent = selectedStudentIds.length > 0 ? 'Tap an Event' : 'Select students first';
         }
 
-        function renderEventCards() {
+        function renderEventCards(filterText = '') {
             const eventGrid = document.getElementById('eventGrid');
-            eventGrid.innerHTML = allEvents
+            const searchLower = filterText.toLowerCase().trim();
+            
+            const filteredEvents = allEvents
                 .filter(event => event.active !== false)
-                .map(event => `
-                    <div class="event-card" onclick="checkIn('${event.id}')">
-                        <div class="event-name">${event.name}</div>
-                    </div>
-                `).join('');
+                .filter(event => {
+                    if (!searchLower) return true;
+                    return event.name.toLowerCase().includes(searchLower);
+                });
+            
+            if (filteredEvents.length === 0 && searchLower) {
+                eventGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-light);">No events match your search</div>';
+            } else {
+                eventGrid.innerHTML = filteredEvents
+                    .map(event => `
+                        <div class="event-card" onclick="checkIn('${event.id}')">
+                            <div class="event-name">${event.name}</div>
+                        </div>
+                    `).join('');
+            }
             updateEventCards();
+        }
+
+        function filterEvents() {
+            const searchInput = document.getElementById('eventSearch');
+            renderEventCards(searchInput.value);
         }
 
         function updateEventCards() {
@@ -1269,12 +1296,10 @@
             const event = allEvents.find(e => e.id === eventId);
             if (!students.length || !event) return;
 
-            showScreen('loadingScreen');
-
             try {
                 const today = new Date().toISOString().split('T')[0];
                 
-                // Check for existing check-ins today (1 read per student)
+                // Check for existing check-ins today BEFORE showing loading screen
                 const checkPromises = students.map(student => 
                     db.ref(`dailyCheckins/${student.id}/${today}`).once('value')
                 );
@@ -1298,15 +1323,17 @@
                     const wasWere = alreadyCheckedIn.length === 1 ? 'was' : 'were';
                     
                     if (studentsToCheckIn.length === 0) {
-                        // All students already checked in
+                        // All students already checked in - show alert and stop
                         alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
-                        showCheckinScreen();
                         return;
                     } else {
                         // Some checked in, some not - show alert but continue with others
                         alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
                     }
                 }
+                
+                // NOW show loading screen after checks are done
+                showScreen('loadingScreen');
                 
                 // Proceed with students who haven't checked in
                 const updates = {};
