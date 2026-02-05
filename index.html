@@ -786,6 +786,62 @@
             color: var(--primary);
             padding: 32px;
         }
+        
+        /* Favorites Section Styles */
+        .favorites-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .favorites-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+        
+        .favorite-card {
+            background: linear-gradient(135deg, #FFF8DC 0%, #FFFAED 100%);
+            border: 2px solid #FFD700;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .favorite-card:active {
+            transform: scale(0.95);
+        }
+        
+        .favorite-star {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+        
+        .favorite-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        .no-favorites {
+            text-align: center;
+            color: var(--text-light);
+            font-style: italic;
+            padding: 20px;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
@@ -892,21 +948,35 @@
 
             <div class="form-group">
                 <label id="eventLabel">Select students first</label>
-                <input type="text" id="eventSearch" placeholder="Search events..." style="margin-bottom: 16px;" oninput="filterEvents()">
-                <div id="eventGrid" class="event-grid"></div>
-            </div>
-
-            <!-- Family Check-In History Section -->
-            <div class="history-section">
-                <div class="history-header" onclick="toggleHistory()">
-                    <div class="history-title">
-                        <span>📜</span>
-                        <span>Family Check-In History</span>
+                
+                <!-- Favorites Section -->
+                <div id="favoritesSection" class="favorites-section" style="display: none;">
+                    <div class="favorites-header">
+                        <span>⭐</span>
+                        <span>Your Favorites</span>
                     </div>
-                    <span id="historyIcon" class="expand-icon">▼</span>
+                    <div id="favoritesGrid" class="favorites-grid"></div>
                 </div>
-                <div id="historyContent" class="history-content">
-                    <div id="historyList" class="history-loading">Loading history...</div>
+                
+                <!-- Family Check-In History Section -->
+                <div id="historySection" class="history-section" style="display: none;">
+                    <div class="history-header" onclick="toggleHistory()">
+                        <div class="history-title">
+                            <span>📜</span>
+                            <span>Family Check-In History</span>
+                        </div>
+                        <span id="historyIcon" class="expand-icon">▼</span>
+                    </div>
+                    <div id="historyContent" class="history-content">
+                        <div id="historyList" class="history-loading">Loading history...</div>
+                    </div>
+                </div>
+                
+                <!-- All Events -->
+                <div style="margin-top: 24px;">
+                    <div style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 12px;">All Events</div>
+                    <input type="text" id="eventSearch" placeholder="Search events..." style="margin-bottom: 16px;" oninput="filterEvents()">
+                    <div id="eventGrid" class="event-grid"></div>
                 </div>
             </div>
         </div>
@@ -1402,6 +1472,9 @@
             const eventGrid = document.getElementById('eventGrid');
             const searchLower = filterText.toLowerCase().trim();
             
+            // Render favorites section
+            renderFavorites();
+            
             let filteredEvents = allEvents
                 .filter(event => event.active !== false)
                 .filter(event => {
@@ -1439,6 +1512,34 @@
                     }).join('');
             }
             updateEventCards();
+        }
+
+        function renderFavorites() {
+            const favoritesSection = document.getElementById('favoritesSection');
+            const historySection = document.getElementById('historySection');
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            
+            // Get pinned events
+            const pinnedEventObjects = allEvents.filter(event => 
+                pinnedEvents.includes(event.id) && event.active !== false
+            );
+            
+            if (pinnedEventObjects.length > 0) {
+                favoritesSection.style.display = 'block';
+                historySection.style.display = 'block';
+                
+                favoritesGrid.innerHTML = pinnedEventObjects
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(event => `
+                        <div class="favorite-card" onclick="checkIn('${event.id}')">
+                            <div class="favorite-star">⭐</div>
+                            <div class="favorite-name">${event.name}</div>
+                        </div>
+                    `).join('');
+            } else {
+                favoritesSection.style.display = 'none';
+                historySection.style.display = 'none';
+            }
         }
 
         function filterEvents() {
@@ -1640,31 +1741,74 @@
             }
             
             try {
-                // Get all check-ins for the current user's family key
-                const snapshot = await db.ref('checkIns')
-                    .orderByChild('familyKey')
-                    .equalTo(currentUser.uid)
-                    .limitToLast(50)
-                    .once('value');
+                // Get family key from first linked student
+                if (userLinkedStudents.length === 0) {
+                    historyList.innerHTML = '<div class="no-history">No students linked to view history.</div>';
+                    return;
+                }
+                
+                const firstStudent = allStudents.find(s => s.id === userLinkedStudents[0]);
+                if (!firstStudent) {
+                    historyList.innerHTML = '<div class="no-history">Unable to load history.</div>';
+                    return;
+                }
+                
+                const familyKey = firstStudent.familyKey;
+                
+                // Get all check-ins from checkins path
+                const snapshot = await db.ref('checkins').once('value');
                 
                 if (!snapshot.exists()) {
                     historyList.innerHTML = '<div class="no-history">No check-ins yet. Your family\'s check-in history will appear here.</div>';
                     return;
                 }
                 
-                // Convert to array and sort by timestamp (newest first)
+                // Collect all check-ins for this family
                 const checkIns = [];
-                snapshot.forEach(child => {
-                    checkIns.push({
-                        id: child.key,
-                        ...child.val()
+                snapshot.forEach(dateNode => {
+                    dateNode.forEach(checkinNode => {
+                        const checkin = checkinNode.val();
+                        if (checkin.familyKey === familyKey) {
+                            checkIns.push({
+                                id: checkinNode.key,
+                                ...checkin
+                            });
+                        }
                     });
                 });
                 
+                if (checkIns.length === 0) {
+                    historyList.innerHTML = '<div class="no-history">No check-ins yet. Your family\'s check-in history will appear here.</div>';
+                    return;
+                }
+                
+                // Sort by timestamp (newest first) and limit to 50
                 checkIns.sort((a, b) => b.timestamp - a.timestamp);
+                const recentCheckIns = checkIns.slice(0, 50);
+                
+                // Group by timestamp and event to combine family check-ins
+                const groupedCheckIns = [];
+                const seen = new Set();
+                
+                for (const checkIn of recentCheckIns) {
+                    const key = `${checkIn.timestamp}-${checkIn.eventId}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        // Find all check-ins with same timestamp and event
+                        const sameCheckIns = recentCheckIns.filter(c => 
+                            c.timestamp === checkIn.timestamp && c.eventId === checkIn.eventId
+                        );
+                        const studentNames = sameCheckIns.map(c => c.studentName);
+                        groupedCheckIns.push({
+                            timestamp: checkIn.timestamp,
+                            eventName: checkIn.eventName,
+                            studentNames: studentNames
+                        });
+                    }
+                }
                 
                 // Display check-ins
-                historyList.innerHTML = checkIns.map(checkIn => {
+                historyList.innerHTML = groupedCheckIns.map(checkIn => {
                     const date = new Date(checkIn.timestamp);
                     const dateStr = date.toLocaleDateString('en-US', { 
                         month: 'short', 
@@ -1677,8 +1821,8 @@
                     return `
                         <div class="history-item">
                             <div class="history-date">${dateStr}</div>
-                            <div class="history-event">${checkIn.eventName || 'Unknown Event'}</div>
-                            <div class="history-students">Students: ${checkIn.studentNames ? checkIn.studentNames.join(', ') : 'Unknown'}</div>
+                            <div class="history-event">${checkIn.eventName}</div>
+                            <div class="history-students">Students: ${checkIn.studentNames.join(', ')}</div>
                         </div>
                     `;
                 }).join('');
