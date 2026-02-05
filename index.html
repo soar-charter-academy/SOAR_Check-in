@@ -2,709 +2,525 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>SOAR Parent Check-In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAR Check-In</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=DM+Serif+Display&family=Spline+Sans+Mono:wght@500;700&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
-        
-        :root {
-            --primary: #2C5F7C;
-            --primary-dark: #1E4158;
-            --accent: #E8934E;
-            --success: #5FA85C;
-            --bg: #F8F9FA;
-            --card: #FFFFFF;
-            --text: #2D3748;
-            --text-light: #718096;
-            --border: #E2E8F0;
-            --shadow: rgba(0, 0, 0, 0.08);
-        }
-        
+
         body {
-            font-family: 'Manrope', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #F8F9FA 0%, #E8EFF5 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: var(--text);
-            padding: 16px;
-            -webkit-font-smoothing: antialiased;
+            padding: 20px;
         }
-        
+
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 32px;
         }
-        
-        .header {
+
+        h1 {
+            color: #667eea;
             text-align: center;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
             margin-bottom: 32px;
-            animation: fadeInDown 0.6s ease-out;
+            font-size: 14px;
         }
-        
-        .logo {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2.8rem;
-            color: var(--primary);
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
-        }
-        
-        .tagline {
-            color: var(--text-light);
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        
-        .card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 4px 24px var(--shadow);
-            animation: fadeInUp 0.6s ease-out 0.1s both;
-        }
-        
-        .card-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--primary);
-            text-align: center;
-        }
-        
-        .card-subtitle {
-            text-align: center;
-            color: var(--text-light);
-            margin-bottom: 28px;
-            font-size: 0.95rem;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-        }
-        
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text);
-            font-size: 1rem;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 18px 16px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-family: 'Manrope', sans-serif;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: var(--bg);
-            -webkit-appearance: none;
-            min-height: 56px;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(44, 95, 124, 0.1);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 14px;
-            font-family: 'Manrope', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 12px;
-            min-height: 56px;
-            touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:active {
-            background: var(--primary-dark);
-            transform: scale(0.98);
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-        }
-        
-        .btn-secondary:active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-sso {
-            background: white;
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
-        
-        .btn-sso:active {
-            background: var(--bg);
-        }
-        
-        .btn-google {
-            background: white;
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        .btn-text {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 0.95rem;
-            padding: 12px;
-            cursor: pointer;
-            min-height: auto;
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 24px 0;
-        }
-        
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-        
-        .divider-text {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-        
-        .student-search {
-            position: relative;
-        }
-        
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            margin-top: 8px;
-            max-height: 320px;
-            overflow-y: auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            z-index: 100;
+
+        /* Auth Screens */
+        .auth-screen {
             display: none;
         }
-        
-        .search-results.active {
+
+        .auth-screen.active {
             display: block;
-            animation: fadeIn 0.2s ease-out;
         }
-        
-        .search-result-item {
-            padding: 18px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid var(--border);
-            min-height: 68px;
+
+        .auth-buttons {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 12px;
         }
-        
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-        
-        .search-result-item:active {
-            background: var(--bg);
-        }
-        
-        .search-result-name {
+
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            color: var(--text);
-            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        
-        .search-result-info {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-top: 4px;
+
+        .btn-google {
+            background: white;
+            border: 2px solid #ddd;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        
-        .selected-students-container {
-            background: var(--bg);
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 20px;
+
+        .btn-google:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .link-button {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        /* Student Selection */
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 24px;
         }
-        
-        .selected-students-header {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-light);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .student-chip {
+
+        .student-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--primary);
-            color: white;
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            font-size: 1rem;
-            animation: scaleIn 0.3s ease-out;
-        }
-        
-        .student-chip button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.3rem;
-            line-height: 1;
-            transition: background 0.2s;
-            flex-shrink: 0;
-            margin-left: 12px;
-        }
-        
-        .student-chip button:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .student-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 18px 16px;
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-height: 60px;
-            position: relative;
-        }
-        
-        .student-checkbox.selected {
-            background: #E8F4F8;
-            border-color: var(--primary);
-        }
-        
-        .student-checkbox:active {
-            transform: scale(0.98);
-        }
-        
-        .student-remove-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: #FEE;
-            color: #C33;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        
-        .student-remove-btn:hover {
-            background: #FCC;
-            transform: translateY(-50%) scale(1.1);
-        }
-        
-        .student-remove-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-        
-        .checkbox {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            border: 2px solid #CBD5E0;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.2s;
-        }
-        
-        .student-checkbox.selected .checkbox {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        .checkmark {
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            display: none;
-        }
-        
-        .student-checkbox.selected .checkmark {
-            display: block;
-        }
-        
-        .student-checkbox.selected .checkmark::before {
-            content: '✓';
-        }
-        
-        .student-info {
-            flex: 1;
-        }
-        
-        .student-checkbox-name {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: var(--text);
-        }
-        
-        .student-checkbox-grade {
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-        
-        .event-grid {
-            display: grid;
-            gap: 14px;
-        }
-        
-        .event-card {
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 14px;
-            padding: 24px 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            min-height: 68px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-        }
-        
-        .event-card.pinned {
-            background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
-            border-color: var(--accent);
-            box-shadow: 0 2px 8px rgba(233, 147, 78, 0.15);
-        }
-        
-        .event-card:active {
-            border-color: var(--primary);
-            background: white;
-            transform: scale(0.98);
-        }
-        
-        .event-card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .event-name {
-            font-weight: 600;
-            color: var(--text);
-            font-size: 1.1rem;
-            flex: 1;
-        }
-        
-        .pin-btn {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            margin-left: 12px;
-            flex-shrink: 0;
-        }
-        
-        .pin-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        
-        .pin-btn:active {
-            transform: scale(0.9);
-        }
-        
-        .pin-btn.pinned {
-            color: var(--accent);
-        }
-        
-        .pin-btn.unpinned {
-            color: var(--text-light);
-            opacity: 0.4;
-        }
-        
-        .event-card:hover .pin-btn.unpinned {
-            opacity: 1;
-        }
-        
-        .user-info {
-            background: var(--bg);
             padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 28px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .user-email {
-            font-size: 0.95rem;
-            color: var(--text-light);
-        }
-        
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-weight: 600;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.95rem;
-            padding: 8px 12px;
+            transition: all 0.3s;
         }
-        
-        .success-animation {
-            text-align: center;
-            padding: 32px 20px;
+
+        .student-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
         }
-        
-        .checkmark-circle {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--success);
-            margin: 0 auto 24px;
+
+        .student-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .student-info {
             display: flex;
             align-items: center;
-            justify-content: center;
-            animation: scaleIn 0.5s ease-out;
+            gap: 12px;
         }
-        
-        .checkmark-circle svg {
-            width: 56px;
-            height: 56px;
-            stroke: white;
-            stroke-width: 3;
-            fill: none;
-            animation: drawCheck 0.5s ease-out 0.3s both;
-        }
-        
-        .success-message {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--success);
-            margin-bottom: 12px;
-        }
-        
-        .success-detail {
-            color: var(--text-light);
-            margin-bottom: 20px;
-            font-size: 1.05rem;
-            line-height: 1.6;
-        }
-        
-        .family-total-card {
-            background: #E8F4F8;
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 32px;
-        }
-        
-        .family-total-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        
-        .family-total-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 8px;
-            font-family: 'Spline Sans Mono', monospace;
-        }
-        
-        .family-total-text {
-            font-size: 1rem;
-            color: var(--text-light);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-light);
-        }
-        
-        .spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
+
+        .student-avatar {
             width: 40px;
             height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
         }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+
+        .student-card.selected .student-avatar {
+            background: white;
+            color: #667eea;
         }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+
+        .checkmark {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        .student-card.selected .checkmark {
+            background: white;
+            border-color: white;
+            color: #667eea;
         }
-        
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+
+        .checkmark::after {
+            content: '✓';
+            display: none;
+            font-weight: bold;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes drawCheck {
-            from {
-                stroke-dasharray: 100;
-                stroke-dashoffset: 100;
-            }
-            to {
-                stroke-dasharray: 100;
-                stroke-dashoffset: 0;
-            }
-        }
-        
-        .error-message {
-            background: #FEE;
-            color: #C33;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1rem;
-        }
-        
-        .info-message {
-            background: #E8F4F8;
-            color: var(--primary);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-        
-        .info-message strong {
+
+        .student-card.selected .checkmark::after {
             display: block;
+        }
+
+        .remove-btn {
+            background: #ff4444;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-left: 8px;
+        }
+
+        .remove-btn:hover {
+            background: #cc0000;
+        }
+
+        /* Event Selection */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            margin-bottom: 0;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 14px;
+            color: #999;
+        }
+
+        .event-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .event-item {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item:hover {
+            background: #f8f9ff;
+        }
+
+        .event-item.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .event-item.pinned {
+            background: #fff8dc;
+            border-left: 4px solid #ffd700;
+        }
+
+        .event-item.pinned.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-left: 4px solid #ffd700;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 24px;
+            border-top: 2px solid #eee;
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .history-header:hover {
+            background: #eef1ff;
+        }
+
+        .history-title {
+            font-weight: 600;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+            font-size: 20px;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .history-content {
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-content.expanded {
+            display: block;
+        }
+
+        .history-item {
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: white;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: #667eea;
             margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .history-event {
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .history-students {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #999;
+            padding: 32px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            padding: 32px;
+        }
+
+        /* Success Screen */
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+
+        .success-message {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .success-details {
+            background: #f8f9ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .success-item {
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .success-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* Add Student Form */
+        .add-student-btn {
+            width: 100%;
+            background: #f0f0f0;
+            color: #667eea;
+            border: 2px dashed #667eea;
+            margin-bottom: 16px;
+        }
+
+        .add-student-btn:hover {
+            background: #f8f9ff;
+        }
+
+        .add-student-form {
+            display: none;
+            background: #f8f9ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .add-student-form.active {
+            display: block;
+        }
+
+        .grade-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        /* Utility */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+
+        .mt-24 {
+            margin-top: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">SOAR</div>
-            <div class="tagline">Parent Check-In</div>
-        </div>
-
-        <!-- Auth Screen with SSO -->
-        <div id="authScreen" class="card">
-            <h2 class="card-title">Welcome Back</h2>
-            <p class="card-subtitle">Sign in to check in your students</p>
-            <div id="authError" class="error-message hidden"></div>
+        <!-- Sign In Screen -->
+        <div id="signInScreen" class="auth-screen active">
+            <h1>🏫 SOAR Check-In</h1>
+            <p class="subtitle">Sign in to check in your students</p>
             
-            <!-- SSO Options (default) -->
-            <div id="ssoOptions">
-                <button class="btn btn-google" onclick="signInWithGoogle()">
+            <div class="auth-buttons">
+                <button class="btn-google" onclick="signInWithGoogle()">
                     <svg width="20" height="20" viewBox="0 0 20 20">
                         <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
                         <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
@@ -713,793 +529,807 @@
                     </svg>
                     Continue with Google
                 </button>
-
-                <div class="divider">
-                    <div class="divider-line"></div>
-                    <span class="divider-text">or</span>
-                    <div class="divider-line"></div>
-                </div>
-
-                <button class="btn btn-secondary" onclick="showEmailForm()">Sign in with Email</button>
+                
+                <button class="btn-secondary" onclick="showEmailSignIn()">
+                    Sign in with Email
+                </button>
             </div>
+        </div>
 
-            <!-- Email/Password Form (hidden by default) -->
-            <div id="emailForm" class="hidden">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" placeholder="parent@email.com" autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
-                </div>
-                <button class="btn btn-primary" onclick="login()">Sign In</button>
-                <button class="btn btn-secondary" onclick="showSignup()">Create Account</button>
-                <button class="btn btn-text" onclick="showSSOOptions()">← Back to sign-in options</button>
-            </div>
+        <!-- Email Sign In Screen -->
+        <div id="emailSignInScreen" class="auth-screen">
+            <h1>🏫 SOAR Check-In</h1>
+            <p class="subtitle">Sign in with your email</p>
+            
+            <input type="email" id="signInEmail" placeholder="Email">
+            <input type="password" id="signInPassword" placeholder="Password">
+            
+            <div id="signInError" class="error-message" style="display: none;"></div>
+            
+            <button class="btn-primary" onclick="signInWithEmail()">Sign In</button>
+            
+            <div class="divider">or</div>
+            
+            <button class="btn-secondary" onclick="showCreateAccount()">Create Account</button>
+            <button class="link-button" onclick="showSignIn()">← Back to sign in options</button>
+        </div>
 
-            <!-- Signup Form -->
-            <div id="signupForm" class="hidden">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="signupEmail" placeholder="parent@email.com" autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" autocomplete="new-password">
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" id="signupPasswordConfirm" placeholder="Confirm your password" autocomplete="new-password">
-                </div>
-                <button class="btn btn-primary" onclick="signup()">Create Account</button>
-                <button class="btn btn-text" onclick="showEmailForm()">← Back to sign in</button>
-            </div>
+        <!-- Create Account Screen -->
+        <div id="createAccountScreen" class="auth-screen">
+            <h1>🏫 SOAR Check-In</h1>
+            <p class="subtitle">Create your account</p>
+            
+            <input type="email" id="createEmail" placeholder="Email">
+            <input type="password" id="createPassword" placeholder="Password (min 6 characters)">
+            
+            <div id="createError" class="error-message" style="display: none;"></div>
+            
+            <button class="btn-primary" onclick="createAccount()">Create Account</button>
+            <button class="link-button" onclick="showEmailSignIn()">← Back to sign in</button>
         </div>
 
         <!-- Student Setup Screen -->
-        <div id="setupScreen" class="card hidden">
-            <h2 class="card-title">Link Your Students</h2>
-            <div class="info-message">
-                <strong>Add all your students!</strong>
-                Search and tap each one. You only need to do this once.
-            </div>
+        <div id="studentSetupScreen" class="auth-screen">
+            <h1>👨‍👩‍👧‍👦 Add Your Students</h1>
+            <p class="subtitle">Add all students in your family</p>
             
-            <div class="form-group student-search">
-                <label>Search for Student</label>
-                <input type="text" id="studentSearch" placeholder="Type student name..." autocomplete="off">
-                <div id="searchResults" class="search-results"></div>
-            </div>
-
-            <div id="selectedStudents"></div>
-
-            <button class="btn btn-primary" onclick="saveStudents()" id="saveStudentsBtn" disabled>Continue</button>
+            <input type="text" id="studentFirstName" placeholder="Student First Name">
+            <input type="text" id="studentLastName" placeholder="Student Last Name">
+            
+            <select id="studentGrade" class="grade-select">
+                <option value="">Select Grade</option>
+                <option value="TK">TK</option>
+                <option value="K">Kindergarten</option>
+                <option value="1">1st Grade</option>
+                <option value="2">2nd Grade</option>
+                <option value="3">3rd Grade</option>
+                <option value="4">4th Grade</option>
+                <option value="5">5th Grade</option>
+                <option value="6">6th Grade</option>
+                <option value="7">7th Grade</option>
+                <option value="8">8th Grade</option>
+            </select>
+            
+            <div id="setupError" class="error-message" style="display: none;"></div>
+            
+            <button class="btn-primary" onclick="addStudentToSetup()">Add Student</button>
+            
+            <div id="setupStudentList" style="margin-top: 24px;"></div>
+            
+            <button id="completeSetupBtn" class="btn-secondary mt-24" onclick="completeSetup()" style="display: none;">
+                Continue to Check-In
+            </button>
         </div>
 
-        <!-- Main Check-in Screen -->
-        <div id="checkinScreen" class="card hidden">
-            <div class="user-info">
-                <span class="user-email" id="userEmail"></span>
-                <button class="logout-btn" onclick="logout()">Sign Out</button>
-            </div>
-
-            <h2 class="card-title">Check In</h2>
+        <!-- Student Selection Screen -->
+        <div id="studentSelectionScreen" class="auth-screen">
+            <h1>👨‍👩‍👧‍👦 Select Students</h1>
+            <p class="subtitle">Who are you checking in today?</p>
             
-            <div class="form-group">
-                <label>Select Student(s)</label>
-                <div id="studentCheckboxes"></div>
-                <button class="btn btn-secondary" onclick="addMoreStudents()" style="margin-top: 16px;">+ Add More Students</button>
+            <div id="studentList" class="student-list"></div>
+            
+            <button class="add-student-btn" onclick="toggleAddStudentForm()">
+                + Add Another Student
+            </button>
+            
+            <div id="addStudentForm" class="add-student-form">
+                <input type="text" id="newStudentFirstName" placeholder="Student First Name">
+                <input type="text" id="newStudentLastName" placeholder="Student Last Name">
+                <select id="newStudentGrade" class="grade-select">
+                    <option value="">Select Grade</option>
+                    <option value="TK">TK</option>
+                    <option value="K">Kindergarten</option>
+                    <option value="1">1st Grade</option>
+                    <option value="2">2nd Grade</option>
+                    <option value="3">3rd Grade</option>
+                    <option value="4">4th Grade</option>
+                    <option value="5">5th Grade</option>
+                    <option value="6">6th Grade</option>
+                    <option value="7">7th Grade</option>
+                    <option value="8">8th Grade</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-primary" onclick="addNewStudent()">Add Student</button>
+                    <button class="btn-secondary" onclick="toggleAddStudentForm()">Cancel</button>
+                </div>
             </div>
+            
+            <button class="btn-primary" onclick="proceedToEventSelection()">
+                Continue
+            </button>
+            
+            <button class="btn-secondary mt-24" onclick="signOut()">
+                Sign Out
+            </button>
+        </div>
 
-            <div class="form-group">
-                <label id="eventLabel">Select students first</label>
-                <input type="text" id="eventSearch" placeholder="Search events..." style="margin-bottom: 16px;" oninput="filterEvents()">
-                <div id="eventGrid" class="event-grid"></div>
+        <!-- Event Selection Screen -->
+        <div id="eventSelectionScreen" class="auth-screen">
+            <h1>📋 Select Event</h1>
+            <p class="subtitle">What are you checking in for?</p>
+            
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="eventSearch" placeholder="Search events..." oninput="filterEvents()">
             </div>
+            
+            <div id="eventList" class="event-list"></div>
+            
+            <!-- Family Check-In History Section -->
+            <div class="history-section">
+                <div class="history-header" onclick="toggleHistory()">
+                    <div class="history-title">
+                        <span>📜</span>
+                        <span>Family Check-In History</span>
+                    </div>
+                    <span id="historyIcon" class="expand-icon">▼</span>
+                </div>
+                <div id="historyContent" class="history-content">
+                    <div id="historyList" class="loading">Loading history...</div>
+                </div>
+            </div>
+            
+            <button class="btn-primary mt-24" onclick="submitCheckIn()">
+                Check In
+            </button>
+            
+            <button class="btn-secondary mt-24" onclick="backToStudentSelection()">
+                ← Back
+            </button>
         </div>
 
         <!-- Success Screen -->
-        <div id="successScreen" class="card hidden">
-            <div class="success-animation">
-                <div class="checkmark-circle">
-                    <svg viewBox="0 0 52 52">
-                        <path d="M14 27l7.5 7.5L38 18"/>
-                    </svg>
-                </div>
-                <div class="success-message">Thank You!</div>
-                <div class="success-detail">
-                    <span id="successStudentNames"></span>
-                    <br />
-                    <span id="successEventName"></span>
-                </div>
-                
-                <div class="family-total-card">
-                    <div class="family-total-label" id="successSchoolYear">Family Participation</div>
-                    <div class="family-total-number" id="successFamilyTotal">0</div>
-                    <div class="family-total-text">Total Check-Ins</div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="returnToCheckin()">Check In Again</button>
-                <button class="btn btn-secondary" onclick="logout()">Done for Today</button>
-            </div>
-        </div>
-
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="card hidden">
-            <div class="loading">
-                <div class="spinner"></div>
-                <div>Loading...</div>
-            </div>
+        <div id="successScreen" class="auth-screen">
+            <div class="success-icon">✓</div>
+            <div class="success-message">Check-in Successful!</div>
+            
+            <div id="successDetails" class="success-details"></div>
+            
+            <button class="btn-primary" onclick="checkInAgain()">
+                Check In Again
+            </button>
+            
+            <button class="btn-secondary mt-24" onclick="signOut()">
+                Sign Out
+            </button>
         </div>
     </div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyANNylnmxNVFpKVTin0MBayvrNgXNlxF6c",
-            authDomain: "soar-check-in.firebaseapp.com",
-            databaseURL: "https://soar-check-in-default-rtdb.firebaseio.com",
-            projectId: "soar-check-in",
-            storageBucket: "soar-check-in.firebasestorage.app",
-            messagingSenderId: "595921529463",
-            appId: "1:595921529463:web:2376d566bd694ce583b472"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        let currentUser = null;
-        let allStudents = [];
-        let allEvents = [];
-        let selectedStudentsList = [];
-        let userLinkedStudents = [];
-        let pinnedEvents = [];
-        let selectedStudentIds = [];
+        // Global state
+        window.currentUser = null;
+        window.familyKey = null;
+        window.students = [];
+        window.selectedStudents = [];
+        window.selectedEvent = null;
+        window.setupStudents = [];
+        window.pinnedEvents = [];
+        window.allEvents = [
+            "1st-6th Parent Meetings",
+            "7th-8th Parent Meetings",
+            "Art Show",
+            "Back to School Night",
+            "Board Meeting",
+            "Book Fair",
+            "Breakfast",
+            "Chaperone Field Trip",
+            "Community Service",
+            "Conferences",
+            "Drop-off",
+            "Field Day",
+            "Game Night",
+            "Graduation",
+            "Holiday Program",
+            "Lunch with Student",
+            "Open House",
+            "Parent Workshop",
+            "Pick-up",
+            "Picture Day",
+            "School Assembly",
+            "Science Fair",
+            "Spirit Week",
+            "Sports Day",
+            "Student Showcase",
+            "Teacher Appreciation",
+            "Talent Show",
+            "Testing Support",
+            "Volunteering",
+            "Year-End Celebration"
+        ];
 
-        // Cache management
-        const CACHE_DURATION = 24 * 60 * 60 * 1000;
+        // Make Firebase functions available globally
+        window.auth = auth;
+        window.db = db;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.firebaseSignOut = firebaseSignOut;
+        window.addDoc = addDoc;
+        window.collection = collection;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.serverTimestamp = serverTimestamp;
 
-        function getCache(key) {
-            const cached = localStorage.getItem(key);
-            if (!cached) return null;
-            const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp > CACHE_DURATION) {
-                localStorage.removeItem(key);
-                return null;
-            }
-            return data;
-        }
-
-        function setCache(key, data) {
-            localStorage.setItem(key, JSON.stringify({
-                data,
-                timestamp: Date.now()
-            }));
-        }
-
-        // School year functions
-        async function getFamilyYearTotal(familyKey) {
-            if (!familyKey) return 0;
-            
-            try {
-                // Get all students with this family key
-                const familyStudents = allStudents.filter(s => s.familyKey === familyKey);
-                
-                if (familyStudents.length === 0) return 0;
-                
-                // Get current counts for all family members
-                const countPromises = familyStudents.map(student => 
-                    db.ref(`studentCounts/${student.id}`).once('value')
-                );
-                
-                const countSnapshots = await Promise.all(countPromises);
-                
-                // Find the MAX count among all siblings
-                let maxCount = 0;
-                countSnapshots.forEach(snapshot => {
-                    const count = snapshot.val() || 0;
-                    if (count > maxCount) {
-                        maxCount = count;
-                    }
-                });
-                
-                return maxCount;
-            } catch (error) {
-                console.error('Error getting family total:', error);
-                return 0;
-            }
-        }
-
-        // Initialize
-        auth.onAuthStateChanged(async (user) => {
+        // Auth state listener
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
-                await loadData();
-                await checkUserSetup();
-            } else {
-                showScreen('authScreen');
-            }
-        });
-
-        async function loadData() {
-            showScreen('loadingScreen');
-            
-            const cachedStudents = getCache('students');
-            const cachedEvents = getCache('events');
-            
-            if (cachedStudents && cachedEvents) {
-                allStudents = cachedStudents;
-                allEvents = cachedEvents;
-                return;
-            }
-
-            try {
-                const [studentsSnap, eventsSnap] = await Promise.all([
-                    db.ref('students').once('value'),
-                    db.ref('events').once('value')
-                ]);
-
-                allStudents = [];
-                studentsSnap.forEach(child => {
-                    allStudents.push({ id: child.key, ...child.val() });
-                });
-
-                allEvents = [];
-                eventsSnap.forEach(child => {
-                    allEvents.push({ id: child.key, ...child.val() });
-                });
-
-                setCache('students', allStudents);
-                setCache('events', allEvents);
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showError('Failed to load data. Please try again.');
-            }
-        }
-
-        async function checkUserSetup() {
-            const userDataSnap = await db.ref(`users/${currentUser.uid}`).once('value');
-            const userData = userDataSnap.val();
-
-            if (userData && userData.linkedStudents && userData.linkedStudents.length > 0) {
-                userLinkedStudents = userData.linkedStudents;
-                pinnedEvents = userData.pinnedEvents || [];
-                showCheckinScreen();
-            } else {
-                showSetupScreen();
-            }
-        }
-
-        // SSO Sign-In Functions
-        async function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try {
-                await auth.signInWithPopup(provider);
-            } catch (error) {
-                console.error('Google sign-in error:', error);
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    showError(error.message);
-                }
-            }
-        }
-
-        // Email/Password Functions
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showError('Please enter email and password');
-                return;
-            }
-
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                showError(error.message);
-            }
-        }
-
-        async function signup() {
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('signupPasswordConfirm').value;
-
-            if (!email || !password) {
-                showError('Please enter email and password');
-                return;
-            }
-
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
-
-            try {
-                await auth.createUserWithEmailAndPassword(email, password);
-            } catch (error) {
-                showError(error.message);
-            }
-        }
-
-        function logout() {
-            auth.signOut();
-        }
-
-        // UI Navigation
-        function showSSOOptions() {
-            document.getElementById('ssoOptions').classList.remove('hidden');
-            document.getElementById('emailForm').classList.add('hidden');
-            document.getElementById('signupForm').classList.add('hidden');
-            clearError();
-        }
-
-        function showEmailForm() {
-            document.getElementById('ssoOptions').classList.add('hidden');
-            document.getElementById('emailForm').classList.remove('hidden');
-            document.getElementById('signupForm').classList.add('hidden');
-            clearError();
-        }
-
-        function showSignup() {
-            document.getElementById('ssoOptions').classList.add('hidden');
-            document.getElementById('emailForm').classList.add('hidden');
-            document.getElementById('signupForm').classList.remove('hidden');
-            clearError();
-        }
-
-        // Fuzzy Search
-        function fuzzyMatch(str, pattern) {
-            const strLower = str.toLowerCase();
-            const patternLower = pattern.toLowerCase();
-            let strIndex = 0, patternIndex = 0, score = 0;
-            while (strIndex < str.length && patternIndex < pattern.length) {
-                if (strLower[strIndex] === patternLower[patternIndex]) {
-                    score++;
-                    patternIndex++;
-                }
-                strIndex++;
-            }
-            return patternIndex === pattern.length ? score : 0;
-        }
-
-        function searchStudents(query) {
-            if (!query || query.length < 2) return [];
-            return allStudents
-                .map(student => ({
-                    student,
-                    score: fuzzyMatch(`${student.firstName} ${student.lastName}`, query)
-                }))
-                .filter(result => result.score > 0)
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10)
-                .map(result => result.student);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('studentSearch');
-            const searchResults = document.getElementById('searchResults');
-
-            searchInput?.addEventListener('input', (e) => {
-                const query = e.target.value;
-                if (query.length < 2) {
-                    searchResults.classList.remove('active');
-                    return;
-                }
-                const results = searchStudents(query);
-                displaySearchResults(results);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.student-search')) {
-                    searchResults.classList.remove('active');
-                }
-            });
-        });
-
-        function displaySearchResults(results) {
-            const searchResults = document.getElementById('searchResults');
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div style="padding: 18px; color: var(--text-light);">No students found</div>';
-                searchResults.classList.add('active');
-                return;
-            }
-            searchResults.innerHTML = results.map(student => `
-                <div class="search-result-item" onclick="selectStudent('${student.id}')">
-                    <div class="search-result-name">${student.firstName} ${student.lastName}</div>
-                    <div class="search-result-info">Grade ${student.grade} • ID: ${student.studentId}</div>
-                </div>
-            `).join('');
-            searchResults.classList.add('active');
-        }
-
-        function selectStudent(studentId) {
-            const student = allStudents.find(s => s.id === studentId);
-            if (!student || selectedStudentsList.find(s => s.id === studentId)) return;
-            selectedStudentsList.push(student);
-            updateSelectedStudents();
-            document.getElementById('studentSearch').value = '';
-            document.getElementById('searchResults').classList.remove('active');
-            document.getElementById('saveStudentsBtn').disabled = false;
-        }
-
-        function removeStudent(studentId) {
-            selectedStudentsList = selectedStudentsList.filter(s => s.id !== studentId);
-            updateSelectedStudents();
-            if (selectedStudentsList.length === 0) {
-                document.getElementById('saveStudentsBtn').disabled = true;
-            }
-        }
-
-        function updateSelectedStudents() {
-            const container = document.getElementById('selectedStudents');
-            if (selectedStudentsList.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            container.innerHTML = `
-                <div class="selected-students-container">
-                    <div class="selected-students-header">Selected (${selectedStudentsList.length})</div>
-                    ${selectedStudentsList.map(student => `
-                        <div class="student-chip">
-                            <span>${student.firstName} ${student.lastName} <span style="opacity: 0.8;">(Grade ${student.grade})</span></span>
-                            <button onclick="removeStudent('${student.id}')">×</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            const btn = document.getElementById('saveStudentsBtn');
-            btn.textContent = `Continue with ${selectedStudentsList.length} student${selectedStudentsList.length > 1 ? 's' : ''}`;
-        }
-
-        async function saveStudents() {
-            if (selectedStudentsList.length === 0) return;
-            const studentIds = selectedStudentsList.map(s => s.id);
-            try {
-                await db.ref(`users/${currentUser.uid}`).set({
-                    email: currentUser.email,
-                    linkedStudents: studentIds,
-                    pinnedEvents: pinnedEvents
-                });
-                userLinkedStudents = studentIds;
-                showCheckinScreen();
-            } catch (error) {
-                console.error('Error saving students:', error);
-                showError('Failed to save students. Please try again.');
-            }
-        }
-
-        function showCheckinScreen() {
-            selectedStudentIds = [];
-            renderStudentCheckboxes();
-            renderEventCards();
-            document.getElementById('userEmail').textContent = currentUser.email;
-            document.getElementById('eventSearch').value = ''; // Clear event search
-            showScreen('checkinScreen');
-        }
-
-        function addMoreStudents() {
-            // Reset the setup screen to allow adding more students
-            selectedStudentsList = allStudents.filter(s => userLinkedStudents.includes(s.id));
-            updateSelectedStudents();
-            showScreen('setupScreen');
-        }
-
-        async function removeStudent(studentId, studentName) {
-            // Confirm removal
-            const confirmed = confirm(`Remove ${studentName} from your account?\n\nYou can always add them back later.`);
-            
-            if (!confirmed) return;
-            
-            // Remove from array
-            const index = userLinkedStudents.indexOf(studentId);
-            if (index > -1) {
-                userLinkedStudents.splice(index, 1);
-            }
-            
-            // Also deselect if currently selected
-            const selectedIndex = selectedStudentIds.indexOf(studentId);
-            if (selectedIndex > -1) {
-                selectedStudentIds.splice(selectedIndex, 1);
-            }
-            
-            // Update Firebase
-            try {
-                await db.ref(`users/${currentUser.uid}`).update({
-                    linkedStudents: userLinkedStudents
-                });
+                window.currentUser = user;
+                window.familyKey = user.uid;
                 
-                // Re-render
-                renderStudentCheckboxes();
-                updateEventLabel();
+                // Load pinned events
+                await loadPinnedEvents();
                 
-                // If no students left, go to setup screen
-                if (userLinkedStudents.length === 0) {
-                    showSetupScreen();
-                }
-            } catch (error) {
-                console.error('Error removing student:', error);
-                showError('Failed to remove student. Please try again.');
-                // Restore student on error
-                userLinkedStudents.push(studentId);
-                renderStudentCheckboxes();
-            }
-        }
-
-        function renderStudentCheckboxes() {
-            const container = document.getElementById('studentCheckboxes');
-            const linkedStudents = allStudents.filter(s => userLinkedStudents.includes(s.id));
-            container.innerHTML = linkedStudents.map(student => `
-                <div class="student-checkbox" data-student-id="${student.id}" onclick="toggleStudent('${student.id}')">
-                    <div class="checkbox"><span class="checkmark"></span></div>
-                    <div class="student-info">
-                        <div class="student-checkbox-name">${student.firstName} ${student.lastName}</div>
-                        <div class="student-checkbox-grade">Grade ${student.grade}</div>
-                    </div>
-                    <button class="student-remove-btn" 
-                            onclick="event.stopPropagation(); removeStudent('${student.id}', '${student.firstName} ${student.lastName}')"
-                            title="Remove student from your account">
-                        ×
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function toggleStudent(studentId) {
-            const index = selectedStudentIds.indexOf(studentId);
-            if (index > -1) {
-                selectedStudentIds.splice(index, 1);
-            } else {
-                selectedStudentIds.push(studentId);
-            }
-            updateStudentCheckboxes();
-            updateEventLabel();
-            updateEventCards();
-        }
-
-        function updateStudentCheckboxes() {
-            const checkboxes = document.querySelectorAll('.student-checkbox');
-            checkboxes.forEach(checkbox => {
-                const studentId = checkbox.dataset.studentId;
-                if (selectedStudentIds.includes(studentId)) {
-                    checkbox.classList.add('selected');
+                // Check if user has students
+                const hasStudents = await checkUserHasStudents();
+                
+                if (!hasStudents) {
+                    showScreen('studentSetupScreen');
                 } else {
-                    checkbox.classList.remove('selected');
+                    await loadStudents();
+                    showScreen('studentSelectionScreen');
+                }
+            } else {
+                window.currentUser = null;
+                window.familyKey = null;
+                window.students = [];
+                showScreen('signInScreen');
+            }
+        });
+
+        // Load pinned events from Firestore
+        async function loadPinnedEvents() {
+            try {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                if (userDoc.exists() && userDoc.data().pinnedEvents) {
+                    window.pinnedEvents = userDoc.data().pinnedEvents;
+                } else {
+                    window.pinnedEvents = [];
+                }
+            } catch (error) {
+                console.error('Error loading pinned events:', error);
+                window.pinnedEvents = [];
+            }
+        }
+        window.loadPinnedEvents = loadPinnedEvents;
+
+        // Check if user has students
+        async function checkUserHasStudents() {
+            const studentsRef = collection(db, 'students');
+            const q = query(studentsRef, where('familyKey', '==', currentUser.uid));
+            const snapshot = await getDocs(q);
+            return !snapshot.empty;
+        }
+
+        // Load students
+        async function loadStudents() {
+            const studentsRef = collection(db, 'students');
+            const q = query(studentsRef, where('familyKey', '==', currentUser.uid));
+            const snapshot = await getDocs(q);
+            
+            window.students = [];
+            snapshot.forEach(doc => {
+                window.students.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            displayStudents();
+        }
+        window.loadStudents = loadStudents;
+
+        // Display students
+        function displayStudents() {
+            const studentList = document.getElementById('studentList');
+            studentList.innerHTML = '';
+            
+            students.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'student-card';
+                card.innerHTML = `
+                    <div class="student-info">
+                        <div class="student-avatar">${student.firstName.charAt(0)}</div>
+                        <div>
+                            <div style="font-weight: 600;">${student.firstName} ${student.lastName}</div>
+                            <div style="font-size: 14px; color: #666;">Grade ${student.grade}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="checkmark"></div>
+                        <button class="remove-btn" onclick="removeStudent('${student.id}', event)">Remove</button>
+                    </div>
+                `;
+                
+                card.querySelector('.student-info').onclick = () => toggleStudent(student.id);
+                studentList.appendChild(card);
+            });
+        }
+        window.displayStudents = displayStudents;
+
+        // Toggle student selection
+        function toggleStudent(studentId) {
+            const card = document.querySelector(`[data-student-id="${studentId}"]`);
+            const index = selectedStudents.indexOf(studentId);
+            
+            if (index > -1) {
+                selectedStudents.splice(index, 1);
+            } else {
+                selectedStudents.push(studentId);
+            }
+            
+            displayStudents();
+            updateStudentCards();
+        }
+        window.toggleStudent = toggleStudent;
+
+        // Update student cards UI
+        function updateStudentCards() {
+            const cards = document.querySelectorAll('.student-card');
+            cards.forEach((card, index) => {
+                const studentId = students[index].id;
+                if (selectedStudents.includes(studentId)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
                 }
             });
         }
 
-        function updateEventLabel() {
-            const label = document.getElementById('eventLabel');
-            label.textContent = selectedStudentIds.length > 0 ? 'Tap an Event' : 'Select students first';
-        }
-
-        function renderEventCards(filterText = '') {
-            const eventGrid = document.getElementById('eventGrid');
-            const searchLower = filterText.toLowerCase().trim();
+        // Display events
+        function displayEvents(eventsToShow = null) {
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
             
-            let filteredEvents = allEvents
-                .filter(event => event.active !== false)
-                .filter(event => {
-                    if (!searchLower) return true;
-                    return event.name.toLowerCase().includes(searchLower);
-                });
+            const events = eventsToShow || allEvents;
             
-            // Sort: pinned events first, then alphabetically
-            filteredEvents.sort((a, b) => {
-                const aIsPinned = pinnedEvents.includes(a.id);
-                const bIsPinned = pinnedEvents.includes(b.id);
+            // Separate pinned and unpinned events
+            const pinned = events.filter(e => pinnedEvents.includes(e)).sort();
+            const unpinned = events.filter(e => !pinnedEvents.includes(e)).sort();
+            
+            // Display pinned first
+            [...pinned, ...unpinned].forEach(event => {
+                const item = document.createElement('div');
+                item.className = 'event-item';
+                if (pinnedEvents.includes(event)) {
+                    item.classList.add('pinned');
+                }
+                if (selectedEvent === event) {
+                    item.classList.add('selected');
+                }
                 
-                if (aIsPinned && !bIsPinned) return -1;
-                if (!aIsPinned && bIsPinned) return 1;
-                return a.name.localeCompare(b.name);
+                const eventText = document.createElement('span');
+                eventText.textContent = event;
+                eventText.onclick = () => selectEvent(event);
+                
+                const starBtn = document.createElement('button');
+                starBtn.className = 'star-btn';
+                starBtn.textContent = pinnedEvents.includes(event) ? '⭐' : '☆';
+                starBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    togglePinEvent(event);
+                };
+                
+                item.appendChild(eventText);
+                item.appendChild(starBtn);
+                eventList.appendChild(item);
             });
-            
-            if (filteredEvents.length === 0 && searchLower) {
-                eventGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-light);">No events match your search</div>';
-            } else {
-                eventGrid.innerHTML = filteredEvents
-                    .map(event => {
-                        const isPinned = pinnedEvents.includes(event.id);
-                        const starIcon = isPinned ? '⭐' : '☆';
-                        return `
-                            <div class="event-card ${isPinned ? 'pinned' : ''}" onclick="checkIn('${event.id}')">
-                                <div class="event-name">${event.name}</div>
-                                <button class="pin-btn ${isPinned ? 'pinned' : 'unpinned'}" 
-                                        onclick="event.stopPropagation(); togglePin('${event.id}')"
-                                        title="${isPinned ? 'Unpin event' : 'Pin event to top'}">
-                                    ${starIcon}
-                                </button>
-                            </div>
-                        `;
-                    }).join('');
-            }
-            updateEventCards();
         }
+        window.displayEvents = displayEvents;
 
-        function filterEvents() {
-            const searchInput = document.getElementById('eventSearch');
-            renderEventCards(searchInput.value);
-        }
-
-        async function togglePin(eventId) {
-            const index = pinnedEvents.indexOf(eventId);
+        // Toggle pin event
+        async function togglePinEvent(event) {
+            const index = pinnedEvents.indexOf(event);
             
             if (index > -1) {
-                // Unpin
                 pinnedEvents.splice(index, 1);
             } else {
-                // Pin
-                pinnedEvents.push(eventId);
+                pinnedEvents.push(event);
             }
             
-            // Save to Firebase
+            // Save to Firestore
             try {
-                await db.ref(`users/${currentUser.uid}/pinnedEvents`).set(pinnedEvents);
+                await setDoc(doc(db, 'users', currentUser.uid), {
+                    pinnedEvents: pinnedEvents
+                }, { merge: true });
+                
+                displayEvents();
             } catch (error) {
                 console.error('Error saving pinned events:', error);
             }
+        }
+        window.togglePinEvent = togglePinEvent;
+
+        // Select event
+        function selectEvent(event) {
+            selectedEvent = event;
+            displayEvents();
+        }
+        window.selectEvent = selectEvent;
+
+        // Filter events
+        function filterEvents() {
+            const searchTerm = document.getElementById('eventSearch').value.toLowerCase();
+            const filtered = allEvents.filter(event => 
+                event.toLowerCase().includes(searchTerm)
+            );
+            displayEvents(filtered);
+        }
+        window.filterEvents = filterEvents;
+
+        // Load family check-in history
+        async function loadFamilyHistory() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '<div class="loading">Loading history...</div>';
             
-            // Re-render events
-            const searchInput = document.getElementById('eventSearch');
-            renderEventCards(searchInput.value);
-        }
-
-        function updateEventCards() {
-            const cards = document.querySelectorAll('.event-card');
-            cards.forEach(card => {
-                if (selectedStudentIds.length > 0) {
-                    card.classList.remove('disabled');
-                } else {
-                    card.classList.add('disabled');
+            try {
+                const checkInsRef = collection(db, 'checkIns');
+                const q = query(
+                    checkInsRef, 
+                    where('familyKey', '==', currentUser.uid),
+                    orderBy('timestamp', 'desc'),
+                    limit(50)
+                );
+                
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    historyList.innerHTML = '<div class="no-history">No check-ins yet. Your family\'s check-in history will appear here.</div>';
+                    return;
                 }
+                
+                historyList.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    
+                    const date = data.timestamp?.toDate() || new Date();
+                    const dateStr = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+                    
+                    item.innerHTML = `
+                        <div class="history-date">${dateStr}</div>
+                        <div class="history-event">${data.event}</div>
+                        <div class="history-students">Students: ${data.studentNames.join(', ')}</div>
+                    `;
+                    
+                    historyList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading history:', error);
+                historyList.innerHTML = '<div class="error-message">Error loading history. Please try again.</div>';
+            }
+        }
+        window.loadFamilyHistory = loadFamilyHistory;
+
+        // Toggle history section
+        function toggleHistory() {
+            const content = document.getElementById('historyContent');
+            const icon = document.getElementById('historyIcon');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+                loadFamilyHistory();
+            }
+        }
+        window.toggleHistory = toggleHistory;
+    </script>
+
+    <script>
+        // Screen navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.auth-screen').forEach(screen => {
+                screen.classList.remove('active');
             });
+            document.getElementById(screenId).classList.add('active');
+            
+            // Load events when showing event selection screen
+            if (screenId === 'eventSelectionScreen') {
+                displayEvents();
+            }
+        }
+        window.showScreen = showScreen;
+
+        // Auth functions
+        function showEmailSignIn() {
+            showScreen('emailSignInScreen');
         }
 
-        async function checkIn(eventId) {
-            if (selectedStudentIds.length === 0) {
-                showError('Please select at least one student');
+        function showCreateAccount() {
+            showScreen('createAccountScreen');
+        }
+
+        function showSignIn() {
+            showScreen('signInScreen');
+        }
+
+        async function signInWithGoogle() {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Error signing in with Google:', error);
+                alert('Error signing in. Please try again.');
+            }
+        }
+
+        async function signInWithEmail() {
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
+            const errorDiv = document.getElementById('signInError');
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function createAccount() {
+            const email = document.getElementById('createEmail').value;
+            const password = document.getElementById('createPassword').value;
+            const errorDiv = document.getElementById('createError');
+            
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                errorDiv.style.display = 'block';
                 return;
             }
-
-            const students = allStudents.filter(s => selectedStudentIds.includes(s.id));
-            const event = allEvents.find(e => e.id === eventId);
-            if (!students.length || !event) return;
-
+            
             try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Check for existing check-ins today BEFORE showing loading screen
-                const checkPromises = students.map(student => 
-                    db.ref(`dailyCheckins/${student.id}/${today}`).once('value')
-                );
-                const checkResults = await Promise.all(checkPromises);
-                
-                // Filter out students who already checked in
-                const alreadyCheckedIn = [];
-                const studentsToCheckIn = [];
-                
-                students.forEach((student, index) => {
-                    if (checkResults[index].exists()) {
-                        alreadyCheckedIn.push(student);
-                    } else {
-                        studentsToCheckIn.push(student);
-                    }
-                });
-                
-                // Show warning if some students already checked in
-                if (alreadyCheckedIn.length > 0) {
-                    const names = alreadyCheckedIn.map(s => s.firstName).join(', ');
-                    const wasWere = alreadyCheckedIn.length === 1 ? 'was' : 'were';
-                    
-                    if (studentsToCheckIn.length === 0) {
-                        // All students already checked in - show alert and stop
-                        alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
-                        return;
-                    } else {
-                        // Some checked in, some not - show alert but continue with others
-                        alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
-                    }
-                }
-                
-                // NOW show loading screen after checks are done
-                showScreen('loadingScreen');
-                
-                // Proceed with students who haven't checked in
-                const updates = {};
-                
-                for (const student of studentsToCheckIn) {
-                    const checkinId = db.ref(`checkins/${today}`).push().key;
-                    const checkinData = {
-                        userId: currentUser.uid,
-                        studentId: student.id,
-                        studentName: `${student.firstName} ${student.lastName}`,
-                        grade: student.grade,
-                        eventName: event.name,
-                        eventId: event.id,
-                        timestamp: Date.now(),
-                        parentEmail: currentUser.email,
-                        familyKey: student.familyKey
-                    };
-                    
-                    // Write check-in record
-                    updates[`checkins/${today}/${checkinId}`] = checkinData;
-                    
-                    // Increment student count
-                    updates[`studentCounts/${student.id}`] = firebase.database.ServerValue.increment(1);
-                    
-                    // Mark as checked in today (prevents duplicates)
-                    updates[`dailyCheckins/${student.id}/${today}`] = event.name;
-                }
-
-                await db.ref().update(updates);
-
-                // Get family total
-                const familyKey = studentsToCheckIn[0].familyKey;
-                const familyTotal = await getFamilyYearTotal(familyKey);
-
-                // Show success with names of students who were checked in
-                const successNames = studentsToCheckIn.length === 1 
-                    ? `${studentsToCheckIn[0].firstName} ${studentsToCheckIn[0].lastName}`
-                    : studentsToCheckIn.map(s => s.firstName).join(', ');
-                
-                // Add note if some were skipped
-                let successDetail = `<strong>${successNames}</strong>`;
-                if (alreadyCheckedIn.length > 0) {
-                    const skippedNames = alreadyCheckedIn.map(s => s.firstName).join(', ');
-                    successDetail += `<br/><small style="color: var(--text-light); font-size: 0.9rem;">(${skippedNames} already checked in today)</small>`;
-                }
-                
-                document.getElementById('successStudentNames').innerHTML = successDetail;
-                document.getElementById('successEventName').textContent = event.name;
-                document.getElementById('successFamilyTotal').textContent = familyTotal;
-                
-                showScreen('successScreen');
-
+                await createUserWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                console.error('Error checking in:', error);
-                showError('Failed to check in. Please try again.');
-                showCheckinScreen();
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
             }
         }
 
-        function returnToCheckin() {
-            selectedStudentIds = [];
-            showCheckinScreen();
+        async function signOut() {
+            await firebaseSignOut(auth);
+            window.selectedStudents = [];
+            window.selectedEvent = null;
         }
 
-        function showScreen(screenId) {
-            ['authScreen', 'setupScreen', 'checkinScreen', 'successScreen', 'loadingScreen'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+        // Student setup functions
+        function addStudentToSetup() {
+            const firstName = document.getElementById('studentFirstName').value.trim();
+            const lastName = document.getElementById('studentLastName').value.trim();
+            const grade = document.getElementById('studentGrade').value;
+            const errorDiv = document.getElementById('setupError');
+            
+            if (!firstName || !lastName || !grade) {
+                errorDiv.textContent = 'Please fill in all fields';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            setupStudents.push({ firstName, lastName, grade });
+            
+            // Clear inputs
+            document.getElementById('studentFirstName').value = '';
+            document.getElementById('studentLastName').value = '';
+            document.getElementById('studentGrade').value = '';
+            errorDiv.style.display = 'none';
+            
+            // Display setup students
+            displaySetupStudents();
+            document.getElementById('completeSetupBtn').style.display = 'block';
+        }
+
+        function displaySetupStudents() {
+            const list = document.getElementById('setupStudentList');
+            list.innerHTML = '<h3 style="margin-bottom: 12px;">Students Added:</h3>';
+            
+            setupStudents.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 12px; background: white; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;';
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${student.firstName} ${student.lastName}</div>
+                        <div style="font-size: 14px; color: #666;">Grade ${student.grade}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeSetupStudent(${index})">Remove</button>
+                `;
+                list.appendChild(item);
             });
-            document.getElementById(screenId).classList.remove('hidden');
         }
 
-        function showSetupScreen() {
-            selectedStudentsList = [];
-            updateSelectedStudents();
-            showScreen('setupScreen');
+        function removeSetupStudent(index) {
+            setupStudents.splice(index, 1);
+            displaySetupStudents();
+            
+            if (setupStudents.length === 0) {
+                document.getElementById('completeSetupBtn').style.display = 'none';
+            }
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('authError');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
+        async function completeSetup() {
+            if (setupStudents.length === 0) {
+                return;
+            }
+            
+            try {
+                // Add all students to Firestore
+                for (const student of setupStudents) {
+                    await addDoc(collection(db, 'students'), {
+                        ...student,
+                        familyKey: currentUser.uid,
+                        createdAt: serverTimestamp()
+                    });
+                }
+                
+                // Load students and proceed
+                await loadStudents();
+                showScreen('studentSelectionScreen');
+            } catch (error) {
+                console.error('Error adding students:', error);
+                alert('Error adding students. Please try again.');
+            }
         }
 
-        function clearError() {
-            document.getElementById('authError').classList.add('hidden');
+        // Add new student from student selection screen
+        function toggleAddStudentForm() {
+            const form = document.getElementById('addStudentForm');
+            form.classList.toggle('active');
+            
+            if (!form.classList.contains('active')) {
+                document.getElementById('newStudentFirstName').value = '';
+                document.getElementById('newStudentLastName').value = '';
+                document.getElementById('newStudentGrade').value = '';
+            }
+        }
+
+        async function addNewStudent() {
+            const firstName = document.getElementById('newStudentFirstName').value.trim();
+            const lastName = document.getElementById('newStudentLastName').value.trim();
+            const grade = document.getElementById('newStudentGrade').value;
+            
+            if (!firstName || !lastName || !grade) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, 'students'), {
+                    firstName,
+                    lastName,
+                    grade,
+                    familyKey: currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+                
+                // Reload students
+                await loadStudents();
+                toggleAddStudentForm();
+            } catch (error) {
+                console.error('Error adding student:', error);
+                alert('Error adding student. Please try again.');
+            }
+        }
+
+        // Remove student
+        async function removeStudent(studentId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('Are you sure you want to remove this student?')) {
+                return;
+            }
+            
+            try {
+                // In a real app, you'd delete from Firestore
+                // For now, just remove from local array
+                students = students.filter(s => s.id !== studentId);
+                selectedStudents = selectedStudents.filter(id => id !== studentId);
+                displayStudents();
+            } catch (error) {
+                console.error('Error removing student:', error);
+                alert('Error removing student. Please try again.');
+            }
+        }
+
+        // Navigation
+        function proceedToEventSelection() {
+            if (selectedStudents.length === 0) {
+                alert('Please select at least one student');
+                return;
+            }
+            
+            showScreen('eventSelectionScreen');
+        }
+
+        function backToStudentSelection() {
+            selectedEvent = null;
+            showScreen('studentSelectionScreen');
+        }
+
+        // Submit check-in
+        async function submitCheckIn() {
+            if (!selectedEvent) {
+                alert('Please select an event');
+                return;
+            }
+            
+            if (selectedStudents.length === 0) {
+                alert('Please select at least one student');
+                return;
+            }
+            
+            try {
+                // Get student names
+                const studentNames = selectedStudents.map(id => {
+                    const student = students.find(s => s.id === id);
+                    return `${student.firstName} ${student.lastName}`;
+                });
+                
+                // Create check-in record
+                await addDoc(collection(db, 'checkIns'), {
+                    familyKey: currentUser.uid,
+                    event: selectedEvent,
+                    studentIds: selectedStudents,
+                    studentNames: studentNames,
+                    timestamp: serverTimestamp()
+                });
+                
+                // Show success screen
+                displaySuccess(selectedEvent, studentNames);
+                showScreen('successScreen');
+            } catch (error) {
+                console.error('Error submitting check-in:', error);
+                alert('Error submitting check-in. Please try again.');
+            }
+        }
+
+        function displaySuccess(event, studentNames) {
+            const details = document.getElementById('successDetails');
+            details.innerHTML = `
+                <div class="success-item"><strong>Event:</strong> ${event}</div>
+                <div class="success-item"><strong>Students:</strong> ${studentNames.join(', ')}</div>
+                <div class="success-item"><strong>Time:</strong> ${new Date().toLocaleString()}</div>
+            `;
+        }
+
+        function checkInAgain() {
+            selectedStudents = [];
+            selectedEvent = null;
+            showScreen('studentSelectionScreen');
         }
     </script>
 </body>
