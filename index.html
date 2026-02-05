@@ -814,9 +814,9 @@
                 </div>
                 
                 <div class="family-total-card">
-                    <div class="family-total-label" id="successSchoolYear">2024-2025 School Year</div>
+                    <div class="family-total-label" id="successSchoolYear">Family Participation</div>
                     <div class="family-total-number" id="successFamilyTotal">0</div>
-                    <div class="family-total-text">Family Check-Ins</div>
+                    <div class="family-total-text">Total Check-Ins</div>
                 </div>
                 
                 <button class="btn btn-primary" onclick="returnToCheckin()">Check In Again</button>
@@ -884,42 +884,32 @@
         }
 
         // School year functions
-        function getCurrentSchoolYear() {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-            const schoolYearStart = currentMonth < 6 ? currentYear - 1 : currentYear;
-            return {
-                start: schoolYearStart,
-                end: schoolYearStart + 1,
-                startDate: new Date(schoolYearStart, 6, 1),
-                endDate: new Date(schoolYearStart + 1, 5, 30, 23, 59, 59)
-            };
-        }
-
         async function getFamilyYearTotal(familyKey) {
-            const schoolYear = getCurrentSchoolYear();
-            const startTimestamp = schoolYear.startDate.getTime();
-            const endTimestamp = schoolYear.endDate.getTime();
+            if (!familyKey) return 0;
             
             try {
-                const checkinRef = db.ref('checkins');
-                const snapshot = await checkinRef.once('value');
+                // Get all students with this family key
+                const familyStudents = allStudents.filter(s => s.familyKey === familyKey);
                 
-                let total = 0;
-                snapshot.forEach(dateSnap => {
-                    dateSnap.forEach(checkinSnap => {
-                        const checkin = checkinSnap.val();
-                        if (checkin.timestamp >= startTimestamp && checkin.timestamp <= endTimestamp) {
-                            const student = allStudents.find(s => s.id === checkin.studentId);
-                            if (student && student.familyKey === familyKey) {
-                                total++;
-                            }
-                        }
-                    });
+                if (familyStudents.length === 0) return 0;
+                
+                // Get current counts for all family members
+                const countPromises = familyStudents.map(student => 
+                    db.ref(`studentCounts/${student.id}`).once('value')
+                );
+                
+                const countSnapshots = await Promise.all(countPromises);
+                
+                // Find the MAX count among all siblings
+                let maxCount = 0;
+                countSnapshots.forEach(snapshot => {
+                    const count = snapshot.val() || 0;
+                    if (count > maxCount) {
+                        maxCount = count;
+                    }
                 });
                 
-                return total;
+                return maxCount;
             } catch (error) {
                 console.error('Error getting family total:', error);
                 return 0;
@@ -1457,7 +1447,6 @@
 
                 // Get family total
                 const familyKey = studentsToCheckIn[0].familyKey;
-                const schoolYear = getCurrentSchoolYear();
                 const familyTotal = await getFamilyYearTotal(familyKey);
 
                 // Show success with names of students who were checked in
@@ -1474,7 +1463,6 @@
                 
                 document.getElementById('successStudentNames').innerHTML = successDetail;
                 document.getElementById('successEventName').textContent = event.name;
-                document.getElementById('successSchoolYear').textContent = `${schoolYear.start}-${schoolYear.end} School Year`;
                 document.getElementById('successFamilyTotal').textContent = familyTotal;
                 
                 showScreen('successScreen');
