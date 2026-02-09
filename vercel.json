@@ -1,1 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/parent",
+      "dest": "/parent-checkin.html"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin-dashboard.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/admin-dashboard.html"
+    }
+  ]
+}
 
