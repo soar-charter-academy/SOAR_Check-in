@@ -984,7 +984,7 @@
         <div class="header-title">SOAR Check-In Dashboard</div>
         <div class="header-actions">
             <span class="last-sync" id="lastSync">Last sync: Loading...</span>
-            <button class="btn btn-secondary" onclick="refreshData()">↻ Refresh</button>
+            <button class="btn btn-secondary" onclick="loadDataWithEmails()">↻ Refresh</button>
             <button class="btn btn-primary" onclick="exportData()">↓ Export CSV</button>
         </div>
     </div>
@@ -2278,4 +2278,8 @@ SOAR Administration</textarea>
             await loadParentEmails();
         }
 
-        //
+        // Initialize dashboard on load
+        loadDataWithEmails();
+    </script>
+</body>
+</html>
