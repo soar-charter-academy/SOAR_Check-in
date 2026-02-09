@@ -862,6 +862,54 @@
             }
         }
     </style>
+    
+    <!-- Password Protection Script - Must be in head to be available for inline event handlers -->
+    <script>
+        // ============================================
+        // PASSWORD PROTECTION
+        // ============================================
+        
+        // SET YOUR PASSWORD HERE
+        const ADMIN_PASSWORD = 'SOARrox198!'; // Change this to your desired password
+        
+        // Check if already authenticated in this session
+        window.addEventListener('DOMContentLoaded', function() {
+            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+                document.getElementById('passwordScreen').style.display = 'none';
+            } else {
+                document.getElementById('passwordInput').focus();
+            }
+        });
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+            
+            if (input.value === ADMIN_PASSWORD) {
+                // Correct password
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                document.getElementById('passwordScreen').style.display = 'none';
+                error.style.display = 'none';
+            } else {
+                // Wrong password
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+                
+                // Shake animation
+                input.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    input.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        // Logout function (add logout button if needed)
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminAuthenticated');
+            location.reload();
+        }
+    </script>
 </head>
 <body>
     <!-- Password Protection Screen -->
@@ -1265,58 +1313,10 @@ SOAR Administration</textarea>
     </div>
 
     <!-- Firebase -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-
-        // ============================================
-// PASSWORD PROTECTION
-// ============================================
-
-// SET YOUR PASSWORD HERE
-const ADMIN_PASSWORD = 'SOARrox198!'; // Change this to your desired password
-
-// Check if already authenticated in this session
-if (sessionStorage.getItem('adminAuthenticated') === 'true') {
-    document.getElementById('passwordScreen').style.display = 'none';
-}
-
-function checkPassword() {
-    const input = document.getElementById('passwordInput');
-    const error = document.getElementById('passwordError');
-    
-    if (input.value === ADMIN_PASSWORD) {
-        // Correct password
-        sessionStorage.setItem('adminAuthenticated', 'true');
-        document.getElementById('passwordScreen').style.display = 'none';
-        error.style.display = 'none';
-    } else {
-        // Wrong password
-        error.style.display = 'block';
-        input.value = '';
-        input.focus();
-        
-        // Shake animation
-        input.style.animation = 'shake 0.5s';
-        setTimeout(() => {
-            input.style.animation = '';
-        }, 500);
-    }
-}
-
-// Focus password input on load
-window.addEventListener('load', () => {
-    if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
-        document.getElementById('passwordInput').focus();
-    }
-});
-
-// Logout function (add logout button if needed)
-function logoutAdmin() {
-    sessionStorage.removeItem('adminAuthenticated');
-    location.reload();
-}
         // Firebase configuration - REPLACE WITH YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyANNylnmxNVFpKVTin0MBayvrNgXNlxF6c",
