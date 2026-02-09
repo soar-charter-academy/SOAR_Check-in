@@ -308,6 +308,534 @@
             display: none;
         }
 
+        /* Student Management Styles */
+        .student-search-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .student-search-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .student-search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.2rem;
+        }
+
+        .student-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            margin-top: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px var(--shadow);
+            z-index: 10;
+            display: none;
+        }
+
+        .student-results.active {
+            display: block;
+        }
+
+        .student-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .student-result-item:hover {
+            background: var(--bg);
+        }
+
+        .student-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-result-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .student-result-info {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .selected-student-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #1E4158 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .selected-student-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .selected-student-details {
+            display: flex;
+            gap: 24px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .student-checkins-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .checkin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkin-info {
+            flex: 1;
+        }
+
+        .checkin-date {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .checkin-event {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .btn-delete {
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #DC2626;
+        }
+
+        .btn-add {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #4A9448;
+        }
+
+        .add-checkin-form {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .add-checkin-form.active {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: var(--text);
+            border: 2px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: var(--bg);
+        }
+
+        .no-checkins {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 8px;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .family-list-item {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .family-list-item:hover {
+            border-color: var(--primary);
+            background: var(--bg);
+        }
+
+        .family-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .family-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .family-count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .family-students {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .clickable-stat-card {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clickable-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Email Campaign Styles */
+        .email-section {
+            margin-bottom: 32px;
+        }
+
+        .campaign-builder {
+            display: grid;
+            gap: 24px;
+        }
+
+        .threshold-selector {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .threshold-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .threshold-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg);
+        }
+
+        .threshold-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .custom-range {
+            display: none;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .custom-range.active {
+            display: flex;
+        }
+
+        .custom-range input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .message-editor {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .message-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .message-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .personalization-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .tag-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .recipient-preview {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .recipient-item {
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recipient-info {
+            flex: 1;
+        }
+
+        .recipient-email {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .recipient-students {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .recipient-count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .email-preview-box {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        .preview-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .preview-to {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .preview-subject {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-top: 8px;
+        }
+
+        .preview-body {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -357,6 +885,214 @@
             <div class="stat-card">
                 <div class="stat-label">Total Students</div>
                 <div class="stat-value" id="studentCount">0</div>
+            </div>
+        </div>
+
+        <!-- Family Participation Stats -->
+        <div class="card" style="margin-bottom: 32px;">
+            <div class="card-header">
+                <h2 class="card-title">📊 Family Participation</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card clickable-stat-card" style="box-shadow: none; border: 1px solid var(--border);" onclick="showFamilyList(1)">
+                    <div class="stat-label">Families with 1+ Check-Ins</div>
+                    <div class="stat-value" id="families1Plus" style="font-size: 2rem;">0%</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">
+                        <span id="families1PlusCount">0</span> of <span id="totalFamilies1">0</span> families
+                    </div>
+                </div>
+                <div class="stat-card clickable-stat-card" style="box-shadow: none; border: 1px solid var(--border);" onclick="showFamilyList(5)">
+                    <div class="stat-label">Families with 5+ Check-Ins</div>
+                    <div class="stat-value" id="families5Plus" style="font-size: 2rem; color: var(--accent);">0%</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">
+                        <span id="families5PlusCount">0</span> of <span id="totalFamilies2">0</span> families
+                    </div>
+                </div>
+                <div class="stat-card clickable-stat-card" style="box-shadow: none; border: 1px solid var(--border);" onclick="showFamilyList(10)">
+                    <div class="stat-label">Families with 10+ Check-Ins</div>
+                    <div class="stat-value" id="families10Plus" style="font-size: 2rem; color: var(--success);">0%</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">
+                        <span id="families10PlusCount">0</span> of <span id="totalFamilies3">0</span> families
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Management Section -->
+        <div class="card" style="margin-bottom: 32px;">
+            <div class="card-header">
+                <h2 class="card-title">🔍 Student Check-In Management</h2>
+            </div>
+            
+            <!-- Student Search -->
+            <div class="student-search-container">
+                <input 
+                    type="text" 
+                    id="studentSearch" 
+                    class="student-search-input" 
+                    placeholder="Search for a student by name..."
+                    oninput="searchStudents()"
+                    onfocus="showStudentResults()"
+                />
+                <span class="search-icon">🔍</span>
+                <div id="studentResults" class="student-results"></div>
+            </div>
+
+            <!-- Selected Student Display -->
+            <div id="selectedStudentSection" style="display: none;">
+                <div id="selectedStudentCard" class="selected-student-card"></div>
+
+                <!-- Add Check-In Form -->
+                <div id="addCheckinForm" class="add-checkin-form">
+                    <h3 style="margin-bottom: 16px;">Add New Check-In</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="newCheckinDate" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time</label>
+                            <input type="time" id="newCheckinTime" class="form-input" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">Event</label>
+                        <select id="newCheckinEvent" class="form-select">
+                            <option value="">Select an event...</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-add" onclick="submitNewCheckin()">Add Check-In</button>
+                        <button class="btn-cancel" onclick="toggleAddCheckinForm()">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Student's Check-Ins -->
+                <div>
+                    <div class="student-checkins-header">
+                        <h3>Check-In History</h3>
+                        <button class="btn-add" onclick="toggleAddCheckinForm()">+ Add Check-In</button>
+                    </div>
+                    <div id="studentCheckinsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Campaign Section -->
+        <div class="card email-section">
+            <div class="card-header">
+                <h2 class="card-title">📧 Email Campaigns</h2>
+            </div>
+
+            <div class="campaign-builder">
+                <!-- Threshold Selection -->
+                <div>
+                    <h3 style="margin-bottom: 12px;">Select Recipients</h3>
+                    <div class="threshold-selector">
+                        <button class="threshold-btn" onclick="selectThreshold('1plus')">1+ Check-Ins</button>
+                        <button class="threshold-btn" onclick="selectThreshold('5plus')">5+ Check-Ins</button>
+                        <button class="threshold-btn" onclick="selectThreshold('10plus')">10+ Check-Ins</button>
+                        <button class="threshold-btn" onclick="selectThreshold('custom')">Custom Range</button>
+                    </div>
+                    <div id="customRange" class="custom-range">
+                        <span>Between</span>
+                        <input type="number" id="minCheckins" placeholder="Min" min="0" value="0">
+                        <span>and</span>
+                        <input type="number" id="maxCheckins" placeholder="Max" min="0" value="4">
+                        <span>check-ins</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadRecipients()" style="margin-top: 16px;">Load Recipients</button>
+                </div>
+
+                <!-- Recipient Preview -->
+                <div id="recipientSection" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3>Recipients (<span id="recipientCount">0</span>)</h3>
+                        <button class="btn btn-secondary" onclick="toggleRecipientList()">
+                            <span id="toggleText">Show List</span>
+                        </button>
+                    </div>
+                    <div id="recipientList" class="recipient-preview" style="display: none;"></div>
+                </div>
+
+                <!-- Message Composer -->
+                <div id="messageSection" style="display: none;">
+                    <h3 style="margin-bottom: 12px;">Compose Message</h3>
+                    
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">Subject Line</label>
+                        <input type="text" id="emailSubject" class="form-input" placeholder="Enter email subject..." value="Thank you for your participation!">
+                    </div>
+
+                    <div class="message-editor">
+                        <label class="form-label">Message</label>
+                        <textarea id="emailMessage" class="message-textarea" placeholder="Write your message here...">Dear Parent,
+
+Thank you for your continued participation in SOAR events! Your family has checked in {COUNT} times this year.
+
+We appreciate your involvement in our school community.
+
+Best regards,
+SOAR Administration</textarea>
+                        
+                        <div style="margin-top: 8px; margin-bottom: 8px;">
+                            <strong style="font-size: 0.85rem;">Personalization Tags:</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">Click to insert</p>
+                        </div>
+                        <div class="personalization-tags">
+                            <button class="tag-btn" onclick="insertTag('{PARENT_EMAIL}')">Parent Email</button>
+                            <button class="tag-btn" onclick="insertTag('{STUDENT_NAMES}')">Student Names</button>
+                            <button class="tag-btn" onclick="insertTag('{COUNT}')">Check-In Count</button>
+                            <button class="tag-btn" onclick="insertTag('{SCHOOL_YEAR}')">School Year</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div id="previewSection" style="display: none;">
+                    <h3 style="margin-bottom: 12px;">Preview</h3>
+                    <div class="email-preview-box">
+                        <div class="preview-header">
+                            <div class="preview-to">To: <span id="previewEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8c8d9caddd6ccf8ddc0d9d5c8d4dd96dbd7d5">[email&#160;protected]</a></span></div>
+                            <div class="preview-subject" id="previewSubject">Subject Line</div>
+                        </div>
+                        <div class="preview-body" id="previewBody">Message preview will appear here...</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="updatePreview()" style="margin-top: 12px;">Refresh Preview</button>
+                </div>
+
+                <!-- Send Section -->
+                <div id="sendSection" style="display: none;">
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> You are about to send <strong><span id="sendCount">0</span> emails</strong>. 
+                        Please review your message and recipients carefully before sending.
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="sendEmails()" id="sendBtn">
+                            📤 Send Emails
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetCampaign()">
+                            Reset
+                        </button>
+                    </div>
+                    
+                    <div id="sendProgress" style="display: none; margin-top: 20px;">
+                        <div style="background: var(--bg); padding: 20px; border-radius: 12px;">
+                            <div style="margin-bottom: 12px;">
+                                <strong>Sending emails...</strong>
+                                <div style="margin-top: 8px; color: var(--text-light);">
+                                    <span id="progressText">0 of 0 sent</span>
+                                </div>
+                            </div>
+                            <div style="background: white; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="progressBar" style="height: 100%; background: var(--success); width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sendResult" style="display: none; margin-top: 20px;"></div>
+                </div>
             </div>
         </div>
 
@@ -441,8 +1177,21 @@
         </div>
     </div>
 
+    <!-- Family List Modal -->
+    <div id="familyModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Families</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Family list will be inserted here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
@@ -464,12 +1213,8 @@
         let filteredCheckins = [];
         let allStudents = [];
         let allEvents = [];
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            setDefaultDates();
-            await loadData();
-        });
+        let studentCounts = {};
+        let familyCounts = {}; // Store family check-in counts globally
 
         function setDefaultDates() {
             const today = new Date();
@@ -484,11 +1229,12 @@
             showLoading(true);
 
             try {
-                // Load students and events
-                const [studentsSnap, eventsSnap, metadataSnap] = await Promise.all([
+                // Load students, events, metadata, and student counts
+                const [studentsSnap, eventsSnap, metadataSnap, countsSnap] = await Promise.all([
                     db.ref('students').once('value'),
                     db.ref('events').once('value'),
-                    db.ref('metadata').once('value')
+                    db.ref('metadata').once('value'),
+                    db.ref('studentCounts').once('value')
                 ]);
 
                 allStudents = [];
@@ -500,6 +1246,8 @@
                 eventsSnap.forEach(child => {
                     allEvents.push({ id: child.key, ...child.val() });
                 });
+
+                studentCounts = countsSnap.val() || {};
 
                 // Update last sync
                 const metadata = metadataSnap.val();
@@ -611,6 +1359,59 @@
             document.getElementById('weekCount').textContent = weekCheckins.length;
             document.getElementById('monthCount').textContent = monthCheckins.length;
             document.getElementById('studentCount').textContent = allStudents.length;
+
+            // Calculate family participation stats
+            updateFamilyStats();
+        }
+
+        function updateFamilyStats() {
+            // Get family counts from studentCounts based on familyKey
+            familyCounts = {}; // Reset and store globally
+            
+            // Group students by family key and get their counts
+            allStudents.forEach(student => {
+                const familyKey = student.familyKey;
+                if (!familyKey || familyKey === '') return; // Skip students without family key
+                
+                const count = studentCounts[student.id] || 0;
+                
+                // For each family, store the max count (since siblings should be equalized)
+                if (!familyCounts[familyKey]) {
+                    familyCounts[familyKey] = 0;
+                }
+                familyCounts[familyKey] = Math.max(familyCounts[familyKey], count);
+            });
+
+            const totalFamilies = Object.keys(familyCounts).length;
+            
+            // Count families at different participation levels
+            let families1Plus = 0;
+            let families5Plus = 0;
+            let families10Plus = 0;
+            
+            Object.values(familyCounts).forEach(count => {
+                if (count >= 1) families1Plus++;
+                if (count >= 5) families5Plus++;
+                if (count >= 10) families10Plus++;
+            });
+
+            // Calculate percentages
+            const percent1Plus = totalFamilies > 0 ? Math.round((families1Plus / totalFamilies) * 100) : 0;
+            const percent5Plus = totalFamilies > 0 ? Math.round((families5Plus / totalFamilies) * 100) : 0;
+            const percent10Plus = totalFamilies > 0 ? Math.round((families10Plus / totalFamilies) * 100) : 0;
+
+            // Update display
+            document.getElementById('families1Plus').textContent = percent1Plus + '%';
+            document.getElementById('families1PlusCount').textContent = families1Plus;
+            document.getElementById('totalFamilies1').textContent = totalFamilies;
+
+            document.getElementById('families5Plus').textContent = percent5Plus + '%';
+            document.getElementById('families5PlusCount').textContent = families5Plus;
+            document.getElementById('totalFamilies2').textContent = totalFamilies;
+
+            document.getElementById('families10Plus').textContent = percent10Plus + '%';
+            document.getElementById('families10PlusCount').textContent = families10Plus;
+            document.getElementById('totalFamilies3').textContent = totalFamilies;
         }
 
         function updateCharts() {
@@ -743,6 +1544,616 @@
             // For now, just disable buttons during loading
             // Could add a proper loading overlay
         }
-    </script>
-</body>
-</html>
+
+        // Student Management Functions
+        let selectedStudent = null;
+        let studentCheckins = [];
+
+        function searchStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('studentResults');
+            
+            if (searchTerm.length < 2) {
+                resultsDiv.classList.remove('active');
+                return;
+            }
+
+            const matches = allStudents.filter(student => {
+                const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+                return fullName.includes(searchTerm);
+            });
+
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<div class="student-result-item" style="text-align: center; color: var(--text-light);">No students found</div>';
+            } else {
+                resultsDiv.innerHTML = matches.slice(0, 10).map(student => `
+                    <div class="student-result-item" onclick="selectStudent('${student.id}')">
+                        <div class="student-result-name">${student.firstName} ${student.lastName}</div>
+                        <div class="student-result-info">Grade ${student.grade} • ID: ${student.id}</div>
+                    </div>
+                `).join('');
+            }
+
+            resultsDiv.classList.add('active');
+        }
+
+        function showStudentResults() {
+            if (document.getElementById('studentSearch').value.length >= 2) {
+                document.getElementById('studentResults').classList.add('active');
+            }
+        }
+
+        // Hide results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.student-search-container')) {
+                document.getElementById('studentResults').classList.remove('active');
+            }
+        });
+
+        async function selectStudent(studentId) {
+            selectedStudent = allStudents.find(s => s.id === studentId);
+            if (!selectedStudent) return;
+
+            // Hide search results
+            document.getElementById('studentResults').classList.remove('active');
+            document.getElementById('studentSearch').value = `${selectedStudent.firstName} ${selectedStudent.lastName}`;
+
+            // Show selected student section
+            document.getElementById('selectedStudentSection').style.display = 'block';
+
+            // Display student card (no parent info or family key shown)
+            const card = document.getElementById('selectedStudentCard');
+            const totalCheckins = studentCounts[studentId] || 0;
+            card.innerHTML = `
+                <div class="selected-student-name">${selectedStudent.firstName} ${selectedStudent.lastName}</div>
+                <div class="selected-student-details">
+                    <div><strong>Grade:</strong> ${selectedStudent.grade}</div>
+                    <div><strong>Student ID:</strong> ${selectedStudent.id}</div>
+                    <div><strong>Total Check-Ins:</strong> ${totalCheckins}</div>
+                </div>
+            `;
+
+            // Load student's check-ins
+            await loadStudentCheckins(selectedStudent);
+
+            // Populate event dropdown in add form
+            const eventSelect = document.getElementById('newCheckinEvent');
+            eventSelect.innerHTML = '<option value="">Select an event...</option>' +
+                allEvents.map(event => `<option value="${event.id}">${event.name}</option>`).join('');
+
+            // Set default date/time to now
+            const now = new Date();
+            document.getElementById('newCheckinDate').valueAsDate = now;
+            document.getElementById('newCheckinTime').value = now.toTimeString().slice(0, 5);
+        }
+
+        async function loadStudentCheckins(student) {
+            const listDiv = document.getElementById('studentCheckinsList');
+            listDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Loading check-ins...</div></div>';
+
+            try {
+                // Load all check-ins for this student
+                const snapshot = await db.ref('checkins').once('value');
+                
+                studentCheckins = [];
+                snapshot.forEach(dateNode => {
+                    dateNode.forEach(checkinNode => {
+                        const checkin = checkinNode.val();
+                        if (checkin.studentId === student.id) {
+                            studentCheckins.push({
+                                key: checkinNode.key,
+                                dateKey: dateNode.key,
+                                ...checkin
+                            });
+                        }
+                    });
+                });
+
+                // Sort by timestamp descending
+                studentCheckins.sort((a, b) => b.timestamp - a.timestamp);
+
+                if (studentCheckins.length === 0) {
+                    listDiv.innerHTML = '<div class="no-checkins">No check-ins found for this student</div>';
+                    return;
+                }
+
+                // Display check-ins
+                listDiv.innerHTML = studentCheckins.map(checkin => {
+                    const date = new Date(checkin.timestamp);
+                    return `
+                        <div class="checkin-item">
+                            <div class="checkin-info">
+                                <div class="checkin-date">${date.toLocaleString()}</div>
+                                <div class="checkin-event">${checkin.eventName}</div>
+                            </div>
+                            <button class="btn-delete" onclick="deleteCheckin('${checkin.dateKey}', '${checkin.key}', '${checkin.eventName}')">
+                                Delete
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading check-ins:', error);
+                listDiv.innerHTML = '<div style="color: red; text-align: center; padding: 20px;">Error loading check-ins</div>';
+            }
+        }
+
+        function toggleAddCheckinForm() {
+            const form = document.getElementById('addCheckinForm');
+            form.classList.toggle('active');
+        }
+
+        async function submitNewCheckin() {
+            if (!selectedStudent) return;
+
+            const date = document.getElementById('newCheckinDate').value;
+            const time = document.getElementById('newCheckinTime').value;
+            const eventId = document.getElementById('newCheckinEvent').value;
+
+            if (!date || !time || !eventId) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const event = allEvents.find(e => e.id === eventId);
+            if (!event) return;
+
+            // Combine date and time into timestamp
+            const dateTimeString = `${date}T${time}`;
+            const timestamp = new Date(dateTimeString).getTime();
+            const dateKey = date; // Format: YYYY-MM-DD
+
+            try {
+                // Create check-in data
+                const checkinData = {
+                    userId: 'ADMIN_ADD', // Mark as admin-added
+                    studentId: selectedStudent.id,
+                    studentName: `${selectedStudent.firstName} ${selectedStudent.lastName}`,
+                    grade: selectedStudent.grade,
+                    eventName: event.name,
+                    eventId: event.id,
+                    timestamp: timestamp,
+                    parentEmail: 'admin@soar.com',
+                    familyKey: selectedStudent.familyKey
+                };
+
+                // Write check-in
+                const checkinId = db.ref(`checkins/${dateKey}`).push().key;
+                const updates = {};
+                updates[`checkins/${dateKey}/${checkinId}`] = checkinData;
+                updates[`dailyCheckins/${selectedStudent.id}/${dateKey}`] = event.name;
+                updates[`studentCounts/${selectedStudent.id}`] = firebase.database.ServerValue.increment(1);
+
+                await db.ref().update(updates);
+
+                alert('Check-in added successfully!');
+                
+                // Reload student's check-ins
+                await loadStudentCheckins(selectedStudent);
+                
+                // Close form
+                toggleAddCheckinForm();
+
+                // Refresh dashboard data
+                await loadData();
+
+            } catch (error) {
+                console.error('Error adding check-in:', error);
+                alert('Error adding check-in. Please try again.');
+            }
+        }
+
+        async function deleteCheckin(dateKey, checkinKey, eventName) {
+            if (!selectedStudent) return;
+
+            const confirmed = confirm(`Are you sure you want to delete this check-in?\n\nStudent: ${selectedStudent.firstName} ${selectedStudent.lastName}\nEvent: ${eventName}`);
+            
+            if (!confirmed) return;
+
+            try {
+                const updates = {};
+                updates[`checkins/${dateKey}/${checkinKey}`] = null;
+                updates[`dailyCheckins/${selectedStudent.id}/${dateKey}`] = null;
+                updates[`studentCounts/${selectedStudent.id}`] = firebase.database.ServerValue.increment(-1);
+
+                await db.ref().update(updates);
+
+                alert('Check-in deleted successfully!');
+
+                // Reload student's check-ins
+                await loadStudentCheckins(selectedStudent);
+
+                // Refresh dashboard data
+                await loadData();
+
+            } catch (error) {
+                console.error('Error deleting check-in:', error);
+                alert('Error deleting check-in. Please try again.');
+            }
+        }
+
+        // Family List Modal Functions
+        function showFamilyList(threshold) {
+            // Filter families by threshold
+            const families = Object.entries(familyCounts)
+                .filter(([familyKey, count]) => count >= threshold)
+                .sort((a, b) => b[1] - a[1]); // Sort by count descending
+
+            // Get family names (student names)
+            const familyData = families.map(([familyKey, count]) => {
+                const students = allStudents.filter(s => s.familyKey === familyKey);
+                const studentNames = students.map(s => `${s.firstName} ${s.lastName}`);
+                return {
+                    familyKey,
+                    count,
+                    studentNames,
+                    displayName: studentNames.length > 0 ? studentNames[0] + (studentNames.length > 1 ? ' Family' : '') : 'Unknown Family'
+                };
+            });
+
+            // Set modal title
+            const modalTitle = document.getElementById('modalTitle');
+            if (threshold === 1) {
+                modalTitle.textContent = `Families with 1+ Check-Ins (${families.length})`;
+            } else if (threshold === 5) {
+                modalTitle.textContent = `Families with 5+ Check-Ins (${families.length})`;
+            } else if (threshold === 10) {
+                modalTitle.textContent = `Families with 10+ Check-Ins (${families.length})`;
+            }
+
+            // Display family list
+            const modalBody = document.getElementById('modalBody');
+            if (familyData.length === 0) {
+                modalBody.innerHTML = '<div class="no-checkins">No families found in this category</div>';
+            } else {
+                modalBody.innerHTML = familyData.map(family => `
+                    <div class="family-list-item">
+                        <div class="family-header">
+                            <div class="family-name">${family.displayName}</div>
+                            <div class="family-count">${family.count} check-ins</div>
+                        </div>
+                        <div class="family-students">Students: ${family.studentNames.join(', ')}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Show modal
+            document.getElementById('familyModal').classList.add('active');
+        }
+
+        function closeModal(event) {
+            // Close if clicking overlay or close button
+            if (!event || event.target.id === 'familyModal') {
+                document.getElementById('familyModal').classList.remove('active');
+            }
+        }
+
+        // Email Campaign Functions
+        let selectedThreshold = null;
+        let campaignRecipients = [];
+        let parentEmails = {}; // Store parent email by familyKey
+        
+        // IMPORTANT: Replace with your Google Apps Script web app URL
+        // Get this after deploying the script as a web app
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+
+        function selectThreshold(threshold) {
+            selectedThreshold = threshold;
+            
+            // Update button states
+            document.querySelectorAll('.threshold-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide custom range
+            const customRange = document.getElementById('customRange');
+            if (threshold === 'custom') {
+                customRange.classList.add('active');
+            } else {
+                customRange.classList.remove('active');
+            }
+        }
+
+        function loadRecipients() {
+            if (!selectedThreshold) {
+                alert('Please select a threshold first');
+                return;
+            }
+
+            // Determine min/max check-ins based on selection
+            let minCheckins, maxCheckins;
+            
+            if (selectedThreshold === '1plus') {
+                minCheckins = 1;
+                maxCheckins = Infinity;
+            } else if (selectedThreshold === '5plus') {
+                minCheckins = 5;
+                maxCheckins = Infinity;
+            } else if (selectedThreshold === '10plus') {
+                minCheckins = 10;
+                maxCheckins = Infinity;
+            } else if (selectedThreshold === 'custom') {
+                minCheckins = parseInt(document.getElementById('minCheckins').value) || 0;
+                maxCheckins = parseInt(document.getElementById('maxCheckins').value) || Infinity;
+            }
+
+            // Filter families by check-in count
+            campaignRecipients = [];
+            
+            Object.entries(familyCounts).forEach(([familyKey, count]) => {
+                if (count >= minCheckins && count <= maxCheckins) {
+                    const students = allStudents.filter(s => s.familyKey === familyKey);
+                    const studentNames = students.map(s => `${s.firstName} ${s.lastName}`);
+                    
+                    // Get parent email (from first student or use placeholder)
+                    const parentEmail = parentEmails[familyKey] || students[0]?.parentEmail || 'noemail@example.com';
+                    
+                    campaignRecipients.push({
+                        familyKey,
+                        email: parentEmail,
+                        studentNames,
+                        count
+                    });
+                }
+            });
+
+            // Sort by count descending
+            campaignRecipients.sort((a, b) => b.count - a.count);
+
+            // Display results
+            displayRecipients();
+            
+            // Show subsequent sections
+            document.getElementById('recipientSection').style.display = 'block';
+            document.getElementById('messageSection').style.display = 'block';
+            document.getElementById('previewSection').style.display = 'block';
+            document.getElementById('sendSection').style.display = 'block';
+            
+            updatePreview();
+        }
+
+        function displayRecipients() {
+            const count = document.getElementById('recipientCount');
+            const list = document.getElementById('recipientList');
+            const sendCount = document.getElementById('sendCount');
+            
+            count.textContent = campaignRecipients.length;
+            sendCount.textContent = campaignRecipients.length;
+            
+            if (campaignRecipients.length === 0) {
+                list.innerHTML = '<div class="no-checkins">No recipients match these criteria</div>';
+            } else {
+                list.innerHTML = campaignRecipients.map(recipient => `
+                    <div class="recipient-item">
+                        <div class="recipient-info">
+                            <div class="recipient-email">${recipient.email}</div>
+                            <div class="recipient-students">Students: ${recipient.studentNames.join(', ')}</div>
+                        </div>
+                        <div class="recipient-count">${recipient.count} check-ins</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleRecipientList() {
+            const list = document.getElementById('recipientList');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (list.style.display === 'none') {
+                list.style.display = 'block';
+                toggleText.textContent = 'Hide List';
+            } else {
+                list.style.display = 'none';
+                toggleText.textContent = 'Show List';
+            }
+        }
+
+        function insertTag(tag) {
+            const textarea = document.getElementById('emailMessage');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            
+            textarea.value = text.substring(0, start) + tag + text.substring(end);
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+        }
+
+        function updatePreview() {
+            if (campaignRecipients.length === 0) {
+                return;
+            }
+
+            const subject = document.getElementById('emailSubject').value;
+            const message = document.getElementById('emailMessage').value;
+            
+            // Use first recipient for preview
+            const sampleRecipient = campaignRecipients[0];
+            
+            // Replace personalization tags
+            const currentYear = new Date().getFullYear();
+            const schoolYear = `${currentYear}-${currentYear + 1}`;
+            
+            const personalizedMessage = message
+                .replace(/{PARENT_EMAIL}/g, sampleRecipient.email)
+                .replace(/{STUDENT_NAMES}/g, sampleRecipient.studentNames.join(', '))
+                .replace(/{COUNT}/g, sampleRecipient.count)
+                .replace(/{SCHOOL_YEAR}/g, schoolYear);
+            
+            document.getElementById('previewEmail').textContent = sampleRecipient.email;
+            document.getElementById('previewSubject').textContent = subject;
+            document.getElementById('previewBody').textContent = personalizedMessage;
+        }
+
+        async function sendEmails() {
+            if (campaignRecipients.length === 0) {
+                alert('No recipients to send to');
+                return;
+            }
+
+            const confirmed = confirm(
+                `You are about to send ${campaignRecipients.length} emails.\n\n` +
+                `This action cannot be undone. Continue?`
+            );
+            
+            if (!confirmed) return;
+
+            // Show progress
+            document.getElementById('sendProgress').style.display = 'block';
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('sendBtn').textContent = 'Sending...';
+            
+            const subject = document.getElementById('emailSubject').value;
+            const messageTemplate = document.getElementById('emailMessage').value;
+            
+            const currentYear = new Date().getFullYear();
+            const schoolYear = `${currentYear}-${currentYear + 1}`;
+            
+            let successCount = 0;
+            let failCount = 0;
+            const total = campaignRecipients.length;
+
+            // Send emails one by one
+            for (let i = 0; i < campaignRecipients.length; i++) {
+                const recipient = campaignRecipients[i];
+                
+                // Personalize message
+                const personalizedMessage = messageTemplate
+                    .replace(/{PARENT_EMAIL}/g, recipient.email)
+                    .replace(/{STUDENT_NAMES}/g, recipient.studentNames.join(', '))
+                    .replace(/{COUNT}/g, recipient.count)
+                    .replace(/{SCHOOL_YEAR}/g, schoolYear);
+                
+                try {
+                    // Send email via Firebase Functions + SendGrid
+                    await simulateEmailSend(recipient.email, subject, personalizedMessage);
+                    successCount++;
+                } catch (error) {
+                    console.error('Error sending to', recipient.email, error);
+                    failCount++;
+                }
+                
+                // Update progress
+                const progress = Math.round(((i + 1) / total) * 100);
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressText').textContent = `${i + 1} of ${total} sent`;
+            }
+
+            // Show results
+            document.getElementById('sendProgress').style.display = 'none';
+            document.getElementById('sendResult').style.display = 'block';
+            document.getElementById('sendResult').innerHTML = `
+                <div style="background: var(--bg); padding: 20px; border-radius: 12px;">
+                    <h3 style="color: var(--success); margin-bottom: 12px;">✓ Campaign Complete</h3>
+                    <p><strong>Successfully sent:</strong> ${successCount} emails</p>
+                    ${failCount > 0 ? `<p style="color: #EF4444;"><strong>Failed:</strong> ${failCount} emails</p>` : ''}
+                    <p style="margin-top: 12px; color: var(--text-light); font-size: 0.9rem;">
+                        Emails sent via Google Apps Script. Check your Gmail Sent folder and recipient inboxes.
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendBtn').textContent = '📤 Send Emails';
+        }
+
+        // Send email using Google Apps Script
+        async function simulateEmailSend(to, subject, body) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Required for Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'sendEmails',
+                        emails: [{
+                            to: to,
+                            subject: subject,
+                            body: body
+                        }]
+                    })
+                });
+                
+                // Note: no-cors mode means we can't read the response
+                // We assume success if no error is thrown
+                return { success: true };
+                
+            } catch (error) {
+                console.error('Error sending email:', error);
+                throw error;
+            }
+        }
+        
+        // Alternative: Send batch of emails in one request (more efficient)
+        async function sendEmailBatch(emails) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'sendEmails',
+                        emails: emails
+                    })
+                });
+                
+                return { success: true };
+                
+            } catch (error) {
+                console.error('Error sending batch:', error);
+                throw error;
+            }
+        }
+
+        function resetCampaign() {
+            selectedThreshold = null;
+            campaignRecipients = [];
+            
+            document.querySelectorAll('.threshold-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('customRange').classList.remove('active');
+            document.getElementById('recipientSection').style.display = 'none';
+            document.getElementById('messageSection').style.display = 'none';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('sendSection').style.display = 'none';
+            document.getElementById('sendResult').style.display = 'none';
+            document.getElementById('recipientList').style.display = 'none';
+            document.getElementById('toggleText').textContent = 'Show List';
+        }
+
+        // Load parent emails from familyContacts (created by nightly sync)
+        async function loadParentEmails() {
+            try {
+                const snapshot = await db.ref('familyContacts').once('value');
+                const familyContactsData = snapshot.val() || {};
+                
+                parentEmails = {};
+                
+                // Map family keys to emails
+                Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
+                    if (contact.email) {
+                        parentEmails[familyKey] = contact.email;
+                    }
+                });
+                
+                console.log(`Loaded ${Object.keys(parentEmails).length} parent emails`);
+            } catch (error) {
+                console.error('Error loading parent emails:', error);
+            }
+        }
+
+        // Call loadParentEmails when data loads
+        async function loadDataWithEmails() {
+            await loadData();
+            await loadParentEmails();
+        }
+
+        //
