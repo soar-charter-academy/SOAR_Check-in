@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOAR Check-In Admin Dashboard</title>
     <style>
+        @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500&display=swap');
         
         * {
@@ -858,6 +862,74 @@
     </style>
 </head>
 <body>
+    <!-- Password Protection Screen -->
+<div id="passwordScreen" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+">
+    <div style="
+        background: white;
+        border-radius: 20px;
+        padding: 60px 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    ">
+        <h1 style="color: #667eea; font-size: 2rem; margin-bottom: 10px;">🔒 Admin Access</h1>
+        <p style="color: #718096; margin-bottom: 30px;">Enter password to continue</p>
+        
+        <input 
+            type="password" 
+            id="passwordInput" 
+            placeholder="Password"
+            style="
+                width: 100%;
+                padding: 16px;
+                border: 2px solid #E2E8F0;
+                border-radius: 12px;
+                font-size: 16px;
+                margin-bottom: 20px;
+                box-sizing: border-box;
+            "
+            onkeypress="if(event.key === 'Enter') checkPassword()"
+        />
+        
+        <button 
+            onclick="checkPassword()"
+            style="
+                width: 100%;
+                padding: 16px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+            "
+        >
+            Unlock Dashboard
+        </button>
+        
+        <div id="passwordError" style="
+            color: #EF4444;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        ">
+            ❌ Incorrect password
+        </div>
+    </div>
+</div>
     <div class="header">
         <div class="header-title">SOAR Check-In Dashboard</div>
         <div class="header-actions">
@@ -1195,6 +1267,54 @@ SOAR Administration</textarea>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
+
+        // ============================================
+// PASSWORD PROTECTION
+// ============================================
+
+// SET YOUR PASSWORD HERE
+const ADMIN_PASSWORD = 'SOARrox198!'; // Change this to your desired password
+
+// Check if already authenticated in this session
+if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+    document.getElementById('passwordScreen').style.display = 'none';
+}
+
+function checkPassword() {
+    const input = document.getElementById('passwordInput');
+    const error = document.getElementById('passwordError');
+    
+    if (input.value === ADMIN_PASSWORD) {
+        // Correct password
+        sessionStorage.setItem('adminAuthenticated', 'true');
+        document.getElementById('passwordScreen').style.display = 'none';
+        error.style.display = 'none';
+    } else {
+        // Wrong password
+        error.style.display = 'block';
+        input.value = '';
+        input.focus();
+        
+        // Shake animation
+        input.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+            input.style.animation = '';
+        }, 500);
+    }
+}
+
+// Focus password input on load
+window.addEventListener('load', () => {
+    if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
+        document.getElementById('passwordInput').focus();
+    }
+});
+
+// Logout function (add logout button if needed)
+function logoutAdmin() {
+    sessionStorage.removeItem('adminAuthenticated');
+    location.reload();
+}
         // Firebase configuration - REPLACE WITH YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyANNylnmxNVFpKVTin0MBayvrNgXNlxF6c",
