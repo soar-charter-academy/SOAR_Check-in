@@ -1301,7 +1301,7 @@
             searchResults.innerHTML = results.map(student => `
                 <div class="search-result-item" onclick="selectStudent('${student.id}')">
                     <div class="search-result-name">${student.firstName} ${student.lastName}</div>
-                    <div class="search-result-info">Grade ${student.grade} • ID: ${student.studentId}</div>
+                    <div class="search-result-info">Grade ${student.grade}</div>
                 </div>
             `).join('');
             searchResults.classList.add('active');
