@@ -1351,6 +1351,19 @@ SOAR Administration</textarea>
             showLoading(true);
 
             try {
+                // Set default date range if not already set (last 30 days to today)
+                const dateFromInput = document.getElementById('dateFrom');
+                const dateToInput = document.getElementById('dateTo');
+                
+                if (!dateFromInput.value || !dateToInput.value) {
+                    const today = new Date();
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+                    
+                    dateFromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+                    dateToInput.value = today.toISOString().split('T')[0];
+                }
+
                 // Load students, events, metadata, and student counts
                 const [studentsSnap, eventsSnap, metadataSnap, countsSnap] = await Promise.all([
                     db.ref('students').once('value'),
@@ -1438,9 +1451,11 @@ SOAR Administration</textarea>
 
         function getDateRange(start, end) {
             const dates = [];
-            const current = new Date(start);
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const current = new Date(startDate);
             
-            while (current <= end) {
+            while (current <= endDate) {
                 dates.push(current.toISOString().split('T')[0]);
                 current.setDate(current.getDate() + 1);
             }
