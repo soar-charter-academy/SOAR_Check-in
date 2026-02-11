@@ -861,6 +861,43 @@
                 align-items: flex-start;
             }
         }
+        
+        /* Clickable bars */
+        .clickable-bar {
+            transition: all 0.2s ease;
+        }
+        
+        .clickable-bar:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        
+        .clickable-bar:active {
+            transform: translateY(0);
+        }
+        
+        /* Notification animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
     </style>
     
     <!-- Password Protection Script - Must be in head to be available for inline event handlers -->
@@ -1111,6 +1148,7 @@
                 <div>
                     <h3 style="margin-bottom: 12px;">Select Recipients</h3>
                     <div class="threshold-selector">
+                        <button class="threshold-btn" onclick="selectThreshold('0only')">0 Check-Ins</button>
                         <button class="threshold-btn" onclick="selectThreshold('1plus')">1+ Check-Ins</button>
                         <button class="threshold-btn" onclick="selectThreshold('5plus')">5+ Check-Ins</button>
                         <button class="threshold-btn" onclick="selectThreshold('10plus')">10+ Check-Ins</button>
@@ -1581,6 +1619,49 @@ SOAR Administration</textarea>
             renderBarChart('eventChart', eventSorted, name => name.length > 20 ? name.substring(0, 17) + '...' : name);
         }
 
+        function filterByChart(type, value) {
+            // Apply the filter
+            if (type === 'grade') {
+                document.getElementById('gradeFilter').value = value;
+                document.getElementById('eventFilter').value = ''; // Clear event filter
+            } else if (type === 'event') {
+                document.getElementById('eventFilter').value = value;
+                document.getElementById('gradeFilter').value = ''; // Clear grade filter  
+            }
+            
+            // Reload check-ins with new filter
+            loadCheckins();
+            
+            // Scroll to the table
+            document.getElementById('checkinTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Show a brief notification
+            showFilterNotification(type, value);
+        }
+        
+        function showFilterNotification(type, value) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: var(--primary);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = `Filtered by ${type}: ${type === 'grade' ? 'Grade ' + value : value}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
         function renderBarChart(containerId, data, labelFormatter) {
             const container = document.getElementById(containerId);
             
@@ -1590,11 +1671,19 @@ SOAR Administration</textarea>
             }
 
             const maxValue = Math.max(...data.map(d => d[1]));
+            
+            // Determine chart type from container ID
+            const chartType = containerId.includes('grade') ? 'grade' : 'event';
 
             container.innerHTML = data.map(([label, value]) => {
                 const height = (value / maxValue) * 100;
                 return `
-                    <div class="bar" style="height: ${height}%" title="${label}: ${value}">
+                    <div class="bar clickable-bar" 
+                         style="height: ${height}%; cursor: pointer;" 
+                         title="${label}: ${value} - Click to filter" 
+                         data-filter-type="${chartType}" 
+                         data-filter-value="${label}"
+                         onclick="filterByChart('${chartType}', '${label}')">
                         <div class="bar-value">${value}</div>
                         <div class="bar-label">${labelFormatter(label)}</div>
                     </div>
@@ -2002,7 +2091,10 @@ SOAR Administration</textarea>
             // Determine min/max check-ins based on selection
             let minCheckins, maxCheckins;
             
-            if (selectedThreshold === '1plus') {
+            if (selectedThreshold === '0only') {
+                minCheckins = 0;
+                maxCheckins = 0;
+            } else if (selectedThreshold === '1plus') {
                 minCheckins = 1;
                 maxCheckins = Infinity;
             } else if (selectedThreshold === '5plus') {
