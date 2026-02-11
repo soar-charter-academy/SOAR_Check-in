@@ -1200,6 +1200,7 @@ SOAR Administration</textarea>
                             <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">Click to insert</p>
                         </div>
                         <div class="personalization-tags">
+                            <button class="tag-btn" onclick="insertTag('{PARENT_NAME}')">Parent Name</button>
                             <button class="tag-btn" onclick="insertTag('{PARENT_EMAIL}')">Parent Email</button>
                             <button class="tag-btn" onclick="insertTag('{STUDENT_NAMES}')">Student Names</button>
                             <button class="tag-btn" onclick="insertTag('{COUNT}')">Check-In Count</button>
@@ -2059,6 +2060,7 @@ SOAR Administration</textarea>
         let selectedThreshold = null;
         let campaignRecipients = [];
         let parentEmails = {}; // Store parent email by familyKey
+        let parentNames = {}; // Store parent names for personalization
         
         // IMPORTANT: Replace with your Google Apps Script web app URL
         // Get this after deploying the script as a web app
@@ -2116,12 +2118,14 @@ SOAR Administration</textarea>
                     const students = allStudents.filter(s => s.familyKey === familyKey);
                     const studentNames = students.map(s => `${s.firstName} ${s.lastName}`);
                     
-                    // Get parent email (from first student or use placeholder)
+                    // Get parent email and name
                     const parentEmail = parentEmails[familyKey] || students[0]?.parentEmail || 'noemail@example.com';
+                    const parentName = parentNames[familyKey] || 'Parent';
                     
                     campaignRecipients.push({
                         familyKey,
                         email: parentEmail,
+                        parentName: parentName,
                         studentNames,
                         count
                     });
@@ -2206,6 +2210,7 @@ SOAR Administration</textarea>
             const schoolYear = `${currentYear}-${currentYear + 1}`;
             
             const personalizedMessage = message
+                .replace(/{PARENT_NAME}/g, sampleRecipient.parentName)
                 .replace(/{PARENT_EMAIL}/g, sampleRecipient.email)
                 .replace(/{STUDENT_NAMES}/g, sampleRecipient.studentNames.join(', '))
                 .replace(/{COUNT}/g, sampleRecipient.count)
@@ -2250,6 +2255,7 @@ SOAR Administration</textarea>
                 
                 // Personalize message
                 const personalizedMessage = messageTemplate
+                    .replace(/{PARENT_NAME}/g, recipient.parentName)
                     .replace(/{PARENT_EMAIL}/g, recipient.email)
                     .replace(/{STUDENT_NAMES}/g, recipient.studentNames.join(', '))
                     .replace(/{COUNT}/g, recipient.count)
@@ -2359,28 +2365,28 @@ SOAR Administration</textarea>
         }
 
         // Load parent emails from familyContacts (created by nightly sync)
- async function loadParentEmails() {
-    try {
-        const snapshot = await db.ref('familyContacts').once('value');
-        const familyContactsData = snapshot.val() || {};
-        
-        parentEmails = {};
-        parentNames = {};  // NEW: Store parent names
-        
-        // Map family keys to emails and names
-        Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
-            if (contact.email) {
-                parentEmails[familyKey] = contact.email;
-                // Get parent name (prefer parent1Name, fallback to parent2Name or 'Parent')
-                parentNames[familyKey] = contact.parent1Name || contact.parent2Name || 'Parent';
+        async function loadParentEmails() {
+            try {
+                const snapshot = await db.ref('familyContacts').once('value');
+                const familyContactsData = snapshot.val() || {};
+                
+                parentEmails = {};
+                parentNames = {}; // Store parent names
+                
+                // Map family keys to emails and names
+                Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
+                    if (contact.email) {
+                        parentEmails[familyKey] = contact.email;
+                        // Get parent name (prefer parent1Name, fallback to parent2Name or 'Parent')
+                        parentNames[familyKey] = contact.parent1Name || contact.parent2Name || 'Parent';
+                    }
+                });
+                
+                console.log(`Loaded ${Object.keys(parentEmails).length} parent emails and names`);
+            } catch (error) {
+                console.error('Error loading parent emails:', error);
             }
-        });
-        
-        console.log(`Loaded ${Object.keys(parentEmails).length} parent emails and names`);
-    } catch (error) {
-        console.error('Error loading parent emails:', error);
-    }
-}
+        }
 
         // Call loadParentEmails when data loads
         async function loadDataWithEmails() {
