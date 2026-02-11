@@ -2359,25 +2359,28 @@ SOAR Administration</textarea>
         }
 
         // Load parent emails from familyContacts (created by nightly sync)
-        async function loadParentEmails() {
-            try {
-                const snapshot = await db.ref('familyContacts').once('value');
-                const familyContactsData = snapshot.val() || {};
-                
-                parentEmails = {};
-                
-                // Map family keys to emails
-                Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
-                    if (contact.email) {
-                        parentEmails[familyKey] = contact.email;
-                    }
-                });
-                
-                console.log(`Loaded ${Object.keys(parentEmails).length} parent emails`);
-            } catch (error) {
-                console.error('Error loading parent emails:', error);
+ async function loadParentEmails() {
+    try {
+        const snapshot = await db.ref('familyContacts').once('value');
+        const familyContactsData = snapshot.val() || {};
+        
+        parentEmails = {};
+        parentNames = {};  // NEW: Store parent names
+        
+        // Map family keys to emails and names
+        Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
+            if (contact.email) {
+                parentEmails[familyKey] = contact.email;
+                // Get parent name (prefer parent1Name, fallback to parent2Name or 'Parent')
+                parentNames[familyKey] = contact.parent1Name || contact.parent2Name || 'Parent';
             }
-        }
+        });
+        
+        console.log(`Loaded ${Object.keys(parentEmails).length} parent emails and names`);
+    } catch (error) {
+        console.error('Error loading parent emails:', error);
+    }
+}
 
         // Call loadParentEmails when data loads
         async function loadDataWithEmails() {
