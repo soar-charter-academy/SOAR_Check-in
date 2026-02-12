@@ -1019,23 +1019,22 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // Firebase configuration
+        // ── API Configuration ──────────────────────────────────────
+        // Replace with your Apps Script Web App URL after deploying
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxqSAv3Y6bT_zmdT4vZaNZhdyxZDbHuKGd-C6aBeEy0NvtOIZtoOWMr83FaZlYMHW3u/exec';
+
+        // Firebase Auth only (for Google Sign-In identity - no database access)
         const firebaseConfig = {
             apiKey: "AIzaSyANNylnmxNVFpKVTin0MBayvrNgXNlxF6c",
             authDomain: "soar-check-in.firebaseapp.com",
-            databaseURL: "https://soar-check-in-default-rtdb.firebaseio.com",
             projectId: "soar-check-in",
-            storageBucket: "soar-check-in.firebasestorage.app",
-            messagingSenderId: "595921529463",
             appId: "1:595921529463:web:2376d566bd694ce583b472"
         };
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.database();
 
         let currentUser = null;
         let allStudents = [];
@@ -1044,6 +1043,26 @@
         let userLinkedStudents = [];
         let pinnedEvents = [];
         let selectedStudentIds = [];
+
+        // ── API helper ────────────────────────────────────────────────
+        async function api(action, params = {}) {
+            const url = new URL(API_URL);
+            url.searchParams.set('action', action);
+            Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url.toString());
+            if (!res.ok) throw new Error('API request failed: ' + res.status);
+            return res.json();
+        }
+
+        // ── localStorage helpers (replaces Firebase users/ path) ──────
+        function getLocalUser() {
+            const raw = localStorage.getItem('soar_user_' + (currentUser?.uid || ''));
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        function saveLocalUser(data) {
+            localStorage.setItem('soar_user_' + (currentUser?.uid || ''), JSON.stringify(data));
+        }
 
         // Cache management
         const CACHE_DURATION = 24 * 60 * 60 * 1000;
@@ -1069,30 +1088,9 @@
         // School year functions
         async function getFamilyYearTotal(familyKey) {
             if (!familyKey) return 0;
-            
             try {
-                // Get all students with this family key
-                const familyStudents = allStudents.filter(s => s.familyKey === familyKey);
-                
-                if (familyStudents.length === 0) return 0;
-                
-                // Get current counts for all family members
-                const countPromises = familyStudents.map(student => 
-                    db.ref(`studentCounts/${student.id}`).once('value')
-                );
-                
-                const countSnapshots = await Promise.all(countPromises);
-                
-                // Find the MAX count among all siblings
-                let maxCount = 0;
-                countSnapshots.forEach(snapshot => {
-                    const count = snapshot.val() || 0;
-                    if (count > maxCount) {
-                        maxCount = count;
-                    }
-                });
-                
-                return maxCount;
+                const res = await api('getFamilyTotal', { familyKey });
+                return res.success ? res.data.total : 0;
             } catch (error) {
                 console.error('Error getting family total:', error);
                 return 0;
@@ -1123,20 +1121,13 @@
             }
 
             try {
-                const [studentsSnap, eventsSnap] = await Promise.all([
-                    db.ref('students').once('value'),
-                    db.ref('events').once('value')
+                const [studentsRes, eventsRes] = await Promise.all([
+                    api('getStudents'),
+                    api('getEvents')
                 ]);
 
-                allStudents = [];
-                studentsSnap.forEach(child => {
-                    allStudents.push({ id: child.key, ...child.val() });
-                });
-
-                allEvents = [];
-                eventsSnap.forEach(child => {
-                    allEvents.push({ id: child.key, ...child.val() });
-                });
+                allStudents = studentsRes.success ? studentsRes.data : [];
+                allEvents   = eventsRes.success   ? eventsRes.data   : [];
 
                 setCache('students', allStudents);
                 setCache('events', allEvents);
@@ -1147,9 +1138,7 @@
         }
 
         async function checkUserSetup() {
-            const userDataSnap = await db.ref(`users/${currentUser.uid}`).once('value');
-            const userData = userDataSnap.val();
-
+            const userData = getLocalUser();
             if (userData && userData.linkedStudents && userData.linkedStudents.length > 0) {
                 userLinkedStudents = userData.linkedStudents;
                 pinnedEvents = userData.pinnedEvents || [];
@@ -1350,11 +1339,7 @@
             if (selectedStudentsList.length === 0) return;
             const studentIds = selectedStudentsList.map(s => s.id);
             try {
-                await db.ref(`users/${currentUser.uid}`).set({
-                    email: currentUser.email,
-                    linkedStudents: studentIds,
-                    pinnedEvents: pinnedEvents
-                });
+                saveLocalUser({ linkedStudents: studentIds, pinnedEvents });
                 userLinkedStudents = studentIds;
                 showCheckinScreen();
             } catch (error) {
@@ -1397,11 +1382,9 @@
                 selectedStudentIds.splice(selectedIndex, 1);
             }
             
-            // Update Firebase
+            // Update localStorage
             try {
-                await db.ref(`users/${currentUser.uid}`).update({
-                    linkedStudents: userLinkedStudents
-                });
+                saveLocalUser({ linkedStudents: userLinkedStudents, pinnedEvents });
                 
                 // Re-render
                 renderStudentCheckboxes();
@@ -1558,12 +1541,8 @@
                 pinnedEvents.push(eventId);
             }
             
-            // Save to Firebase
-            try {
-                await db.ref(`users/${currentUser.uid}/pinnedEvents`).set(pinnedEvents);
-            } catch (error) {
-                console.error('Error saving pinned events:', error);
-            }
+            // Save to localStorage
+            saveLocalUser({ linkedStudents: userLinkedStudents, pinnedEvents });
             
             // Re-render events
             const searchInput = document.getElementById('eventSearch');
@@ -1594,18 +1573,17 @@
             try {
                 const today = new Date().toISOString().split('T')[0];
                 
-                // Check for existing check-ins today BEFORE showing loading screen
-                const checkPromises = students.map(student => 
-                    db.ref(`dailyCheckins/${student.id}/${today}`).once('value')
-                );
-                const checkResults = await Promise.all(checkPromises);
+                // Check for existing check-ins today via API
+                const studentIds = students.map(s => s.id).join(',');
+                const checkRes = await api('checkDailyCheckins', { studentIds, date: today });
+                const alreadyCheckedInMap = checkRes.success ? checkRes.data : {};
                 
                 // Filter out students who already checked in
                 const alreadyCheckedIn = [];
                 const studentsToCheckIn = [];
                 
-                students.forEach((student, index) => {
-                    if (checkResults[index].exists()) {
+                students.forEach(student => {
+                    if (alreadyCheckedInMap[student.id]) {
                         alreadyCheckedIn.push(student);
                     } else {
                         studentsToCheckIn.push(student);
@@ -1618,50 +1596,30 @@
                     const wasWere = alreadyCheckedIn.length === 1 ? 'was' : 'were';
                     
                     if (studentsToCheckIn.length === 0) {
-                        // All students already checked in - show alert and stop
                         alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
                         return;
                     } else {
-                        // Some checked in, some not - show alert but continue with others
                         alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
                     }
                 }
                 
-                // NOW show loading screen after checks are done
+                // Show loading screen
                 showScreen('loadingScreen');
                 
-                // Proceed with students who haven't checked in
-                const updates = {};
+                // Submit via API
+                const checkinPayload = {
+                    students: studentsToCheckIn,
+                    eventName: event.name,
+                    eventId: event.id,
+                    parentEmail: currentUser.email,
+                    userId: currentUser.uid
+                };
+
+                const result = await api('submitCheckin', { data: JSON.stringify(checkinPayload) });
                 
-                for (const student of studentsToCheckIn) {
-                    const checkinId = db.ref(`checkins/${today}`).push().key;
-                    const checkinData = {
-                        userId: currentUser.uid,
-                        studentId: student.id,
-                        studentName: `${student.firstName} ${student.lastName}`,
-                        grade: student.grade,
-                        eventName: event.name,
-                        eventId: event.id,
-                        timestamp: Date.now(),
-                        parentEmail: currentUser.email,
-                        familyKey: student.familyKey
-                    };
-                    
-                    // Write check-in record
-                    updates[`checkins/${today}/${checkinId}`] = checkinData;
-                    
-                    // Increment student count
-                    updates[`studentCounts/${student.id}`] = firebase.database.ServerValue.increment(1);
-                    
-                    // Mark as checked in today (prevents duplicates)
-                    updates[`dailyCheckins/${student.id}/${today}`] = event.name;
-                }
-
-                await db.ref().update(updates);
-
-                // Get family total
-                const familyKey = studentsToCheckIn[0].familyKey;
-                const familyTotal = await getFamilyYearTotal(familyKey);
+                if (!result.success) throw new Error(result.error || 'Check-in failed');
+                
+                const familyTotal = result.familyTotal || 0;
 
                 // Show success with names of students who were checked in
                 const successNames = studentsToCheckIn.length === 1 
@@ -1755,47 +1713,25 @@
                 
                 const familyKey = firstStudent.familyKey;
                 
-                // Get all check-ins from checkins path
-                const snapshot = await db.ref('checkins').once('value');
+                // Get family check-ins from API
+                const res = await api('getFamilyHistory', { familyKey });
                 
-                if (!snapshot.exists()) {
+                if (!res.success || !res.data || res.data.length === 0) {
                     historyList.innerHTML = '<div class="no-history">No check-ins yet. Your family\'s check-in history will appear here.</div>';
                     return;
                 }
                 
-                // Collect all check-ins for this family
-                const checkIns = [];
-                snapshot.forEach(dateNode => {
-                    dateNode.forEach(checkinNode => {
-                        const checkin = checkinNode.val();
-                        if (checkin.familyKey === familyKey) {
-                            checkIns.push({
-                                id: checkinNode.key,
-                                ...checkin
-                            });
-                        }
-                    });
-                });
-                
-                if (checkIns.length === 0) {
-                    historyList.innerHTML = '<div class="no-history">No check-ins yet. Your family\'s check-in history will appear here.</div>';
-                    return;
-                }
-                
-                // Sort by timestamp (newest first) and limit to 50
-                checkIns.sort((a, b) => b.timestamp - a.timestamp);
-                const recentCheckIns = checkIns.slice(0, 50);
+                const checkIns = res.data.slice(0, 50);
                 
                 // Group by timestamp and event to combine family check-ins
                 const groupedCheckIns = [];
                 const seen = new Set();
                 
-                for (const checkIn of recentCheckIns) {
+                for (const checkIn of checkIns) {
                     const key = `${checkIn.timestamp}-${checkIn.eventId}`;
                     if (!seen.has(key)) {
                         seen.add(key);
-                        // Find all check-ins with same timestamp and event
-                        const sameCheckIns = recentCheckIns.filter(c => 
+                        const sameCheckIns = checkIns.filter(c => 
                             c.timestamp === checkIn.timestamp && c.eventId === checkIn.eventId
                         );
                         const studentNames = sameCheckIns.map(c => c.studentName);
