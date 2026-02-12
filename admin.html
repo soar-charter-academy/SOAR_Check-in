@@ -903,47 +903,49 @@
     <!-- Password Protection Script - Must be in head to be available for inline event handlers -->
     <script>
         // ============================================
-        // PASSWORD PROTECTION
+        // PASSWORD PROTECTION - validated server-side, no secrets in this file
         // ============================================
-        
-        // SET YOUR PASSWORD HERE
-        const ADMIN_PASSWORD = 'SOARrox198!'; // Change this to your desired password
-        
-        // Check if already authenticated in this session
+
+        // Check if already have a valid token in this session
         window.addEventListener('DOMContentLoaded', function() {
-            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+            if (sessionStorage.getItem('adminToken')) {
                 document.getElementById('passwordScreen').style.display = 'none';
+                loadDataWithEmails();
             } else {
                 document.getElementById('passwordInput').focus();
             }
         });
-        
-        function checkPassword() {
+
+        async function checkPassword() {
             const input = document.getElementById('passwordInput');
             const error = document.getElementById('passwordError');
-            
-            if (input.value === ADMIN_PASSWORD) {
-                // Correct password
-                sessionStorage.setItem('adminAuthenticated', 'true');
-                document.getElementById('passwordScreen').style.display = 'none';
-                error.style.display = 'none';
-            } else {
-                // Wrong password
+
+            try {
+                const res = await fetch(`${API_URL}?action=adminLogin&password=${encodeURIComponent(input.value)}`);
+                const result = await res.json();
+
+                if (result.success && result.token) {
+                    sessionStorage.setItem('adminToken', result.token);
+                    document.getElementById('passwordScreen').style.display = 'none';
+                    error.style.display = 'none';
+                    loadDataWithEmails();
+                } else {
+                    error.style.display = 'block';
+                    error.textContent = '❌ Incorrect password';
+                    input.value = '';
+                    input.focus();
+                    input.style.animation = 'shake 0.5s';
+                    setTimeout(() => { input.style.animation = ''; }, 500);
+                }
+            } catch(e) {
                 error.style.display = 'block';
+                error.textContent = '❌ Connection error. Please try again.';
                 input.value = '';
-                input.focus();
-                
-                // Shake animation
-                input.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    input.style.animation = '';
-                }, 500);
             }
         }
-        
-        // Logout function (add logout button if needed)
+
         function logoutAdmin() {
-            sessionStorage.removeItem('adminAuthenticated');
+            sessionStorage.removeItem('adminToken');
             location.reload();
         }
     </script>
@@ -1352,30 +1354,31 @@ SOAR Administration</textarea>
     </div>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- No Firebase SDK - all data goes through API proxy -->
 
     <script>
-        // Firebase configuration - REPLACE WITH YOUR FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyANNylnmxNVFpKVTin0MBayvrNgXNlxF6c",
-            authDomain: "soar-check-in.firebaseapp.com",
-            databaseURL: "https://soar-check-in-default-rtdb.firebaseio.com",
-            projectId: "soar-check-in",
-            storageBucket: "soar-check-in.firebasestorage.app",
-            messagingSenderId: "595921529463",
-            appId: "1:595921529463:web:2376d566bd694ce583b472"
-        };
+        // ── API Configuration ──────────────────────────────────────────
+        // Replace with your Apps Script Web App URL after deploying
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxqSAv3Y6bT_zmdT4vZaNZhdyxZDbHuKGd-C6aBeEy0NvtOIZtoOWMr83FaZlYMHW3u/exec';
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // ── API helper ─────────────────────────────────────────────────
+        async function api(action, params = {}) {
+            const token = sessionStorage.getItem('adminToken');
+            const url = new URL(API_URL);
+            url.searchParams.set('action', action);
+            if (token) url.searchParams.set('token', token);
+            Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url.toString());
+            if (!res.ok) throw new Error('API error: ' + res.status);
+            return res.json();
+        }
 
         let allCheckins = [];
         let filteredCheckins = [];
         let allStudents = [];
         let allEvents = [];
         let studentCounts = {};
-        let familyCounts = {}; // Store family check-in counts globally
+        let familyCounts = {};
 
         function setDefaultDates() {
             const today = new Date();
@@ -1403,28 +1406,15 @@ SOAR Administration</textarea>
                     dateToInput.value = today.toISOString().split('T')[0];
                 }
 
-                // Load students, events, metadata, and student counts
-                const [studentsSnap, eventsSnap, metadataSnap, countsSnap] = await Promise.all([
-                    db.ref('students').once('value'),
-                    db.ref('events').once('value'),
-                    db.ref('metadata').once('value'),
-                    db.ref('studentCounts').once('value')
-                ]);
+                // Load students, events, metadata, and student counts via API
+                const dataRes = await api('getAdminData');
+                if (!dataRes.success) throw new Error(dataRes.error || 'Failed to load data');
 
-                allStudents = [];
-                studentsSnap.forEach(child => {
-                    allStudents.push({ id: child.key, ...child.val() });
-                });
+                allStudents  = dataRes.data.students  || [];
+                allEvents    = dataRes.data.events    || [];
+                studentCounts = dataRes.data.studentCounts || {};
 
-                allEvents = [];
-                eventsSnap.forEach(child => {
-                    allEvents.push({ id: child.key, ...child.val() });
-                });
-
-                studentCounts = countsSnap.val() || {};
-
-                // Update last sync
-                const metadata = metadataSnap.val();
+                const metadata = dataRes.data.metadata;
                 if (metadata && metadata.lastSync) {
                     const syncDate = new Date(metadata.lastSync);
                     document.getElementById('lastSync').textContent = 
@@ -1466,21 +1456,11 @@ SOAR Administration</textarea>
 
             allCheckins = [];
 
-            // Generate list of dates in range
-            const dates = getDateRange(new Date(dateFrom), new Date(dateTo));
-
-            // Fetch check-ins for each date
-            const promises = dates.map(date => 
-                db.ref(`checkins/${date}`).once('value')
-            );
-
-            const snapshots = await Promise.all(promises);
-
-            snapshots.forEach(snap => {
-                snap.forEach(child => {
-                    allCheckins.push({ id: child.key, ...child.val() });
-                });
-            });
+            // Fetch check-ins via API (server filters by date range)
+            const res = await api('getCheckins', { dateFrom, dateTo });
+            if (res.success) {
+                allCheckins = res.data;
+            }
 
             // Sort by timestamp descending
             allCheckins.sort((a, b) => b.timestamp - a.timestamp);
@@ -1859,22 +1839,12 @@ SOAR Administration</textarea>
             listDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>Loading check-ins...</div></div>';
 
             try {
-                // Load all check-ins for this student
-                const snapshot = await db.ref('checkins').once('value');
-                
+                const res = await api('getStudentCheckins', { studentId: student.id });
                 studentCheckins = [];
-                snapshot.forEach(dateNode => {
-                    dateNode.forEach(checkinNode => {
-                        const checkin = checkinNode.val();
-                        if (checkin.studentId === student.id) {
-                            studentCheckins.push({
-                                key: checkinNode.key,
-                                dateKey: dateNode.key,
-                                ...checkin
-                            });
-                        }
-                    });
-                });
+                
+                if (res.success && res.data) {
+                    studentCheckins = res.data;
+                }
 
                 // Sort by timestamp descending
                 studentCheckins.sort((a, b) => b.timestamp - a.timestamp);
@@ -1932,27 +1902,19 @@ SOAR Administration</textarea>
             const dateKey = date; // Format: YYYY-MM-DD
 
             try {
-                // Create check-in data
                 const checkinData = {
-                    userId: 'ADMIN_ADD', // Mark as admin-added
-                    studentId: selectedStudent.id,
+                    studentId:   selectedStudent.id,
                     studentName: `${selectedStudent.firstName} ${selectedStudent.lastName}`,
-                    grade: selectedStudent.grade,
-                    eventName: event.name,
-                    eventId: event.id,
-                    timestamp: timestamp,
-                    parentEmail: 'admin@soar.com',
-                    familyKey: selectedStudent.familyKey
+                    grade:       selectedStudent.grade,
+                    eventName:   event.name,
+                    eventId:     event.id,
+                    timestamp:   new Date(dateTimeString).getTime(),
+                    dateKey:     date,
+                    familyKey:   selectedStudent.familyKey
                 };
 
-                // Write check-in
-                const checkinId = db.ref(`checkins/${dateKey}`).push().key;
-                const updates = {};
-                updates[`checkins/${dateKey}/${checkinId}`] = checkinData;
-                updates[`dailyCheckins/${selectedStudent.id}/${dateKey}`] = event.name;
-                updates[`studentCounts/${selectedStudent.id}`] = firebase.database.ServerValue.increment(1);
-
-                await db.ref().update(updates);
+                const res = await api('adminAddCheckin', { data: JSON.stringify(checkinData) });
+                if (!res.success) throw new Error(res.error || 'Failed to add check-in');
 
                 alert('Check-in added successfully!');
                 
@@ -1979,12 +1941,12 @@ SOAR Administration</textarea>
             if (!confirmed) return;
 
             try {
-                const updates = {};
-                updates[`checkins/${dateKey}/${checkinKey}`] = null;
-                updates[`dailyCheckins/${selectedStudent.id}/${dateKey}`] = null;
-                updates[`studentCounts/${selectedStudent.id}`] = firebase.database.ServerValue.increment(-1);
-
-                await db.ref().update(updates);
+                const res = await api('adminDeleteCheckin', {
+                    dateKey:    dateKey,
+                    checkinKey: checkinKey,
+                    studentId:  selectedStudent.id
+                });
+                if (!res.success) throw new Error(res.error || 'Failed to delete');
 
                 alert('Check-in deleted successfully!');
 
@@ -2367,24 +2329,22 @@ SOAR Administration</textarea>
         // Load parent emails from familyContacts (created by nightly sync)
         async function loadParentEmails() {
             try {
-                const snapshot = await db.ref('familyContacts').once('value');
-                const familyContactsData = snapshot.val() || {};
+                const res = await api('getFamilyContacts');
+                const familyContactsData = (res.success && res.data) ? res.data : {};
                 
                 parentEmails = {};
-                parentNames = {}; // Store parent names
+                parentNames  = {};
                 
-                // Map family keys to emails and names
                 Object.entries(familyContactsData).forEach(([familyKey, contact]) => {
                     if (contact.email) {
                         parentEmails[familyKey] = contact.email;
-                        // Get parent name (prefer parent1Name, fallback to parent2Name or 'Parent')
-                        parentNames[familyKey] = contact.parent1Name || contact.parent2Name || 'Parent';
+                        parentNames[familyKey]  = contact.parent1Name || contact.parent2Name || 'Parent';
                     }
                 });
                 
                 console.log(`Loaded ${Object.keys(parentEmails).length} parent emails and names`);
             } catch (error) {
-                console.error('Error loading parent emails:', error);
+                console.error('Error loading parent contacts:', error);
             }
         }
 
