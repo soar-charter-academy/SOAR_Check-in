@@ -1065,7 +1065,8 @@
         }
 
         // Cache management
-        const CACHE_DURATION = 24 * 60 * 60 * 1000;
+        // Students always fetched fresh; events cached for 1 hour
+        const CACHE_DURATION = 60 * 60 * 1000;
 
         function getCache(key) {
             const cached = localStorage.getItem(key);
@@ -1110,27 +1111,22 @@
 
         async function loadData() {
             showScreen('loadingScreen');
-            
-            const cachedStudents = getCache('students');
+
+            // Events can be cached (change rarely)
+            // Students always fetched fresh so Aeries sync changes appear immediately
             const cachedEvents = getCache('events');
-            
-            if (cachedStudents && cachedEvents) {
-                allStudents = cachedStudents;
-                allEvents = cachedEvents;
-                return;
-            }
 
             try {
-                const [studentsRes, eventsRes] = await Promise.all([
-                    api('getStudents'),
-                    api('getEvents')
-                ]);
-
+                const studentsRes = await api('getStudents');
                 allStudents = studentsRes.success ? studentsRes.data : [];
-                allEvents   = eventsRes.success   ? eventsRes.data   : [];
 
-                setCache('students', allStudents);
-                setCache('events', allEvents);
+                if (cachedEvents) {
+                    allEvents = cachedEvents;
+                } else {
+                    const eventsRes = await api('getEvents');
+                    allEvents = eventsRes.success ? eventsRes.data : [];
+                    setCache('events', allEvents);
+                }
             } catch (error) {
                 console.error('Error loading data:', error);
                 showError('Failed to load data. Please try again.');
