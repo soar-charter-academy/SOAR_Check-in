@@ -1065,14 +1065,16 @@
         }
 
         // Cache management
-        // Students always fetched fresh; events cached for 1 hour
+        // Students cached for 30 min (nightly Aeries sync means fresh-enough); events cached for 5 hours
         const CACHE_DURATION = 5 * 60 * 60 * 1000;
+        const STUDENT_CACHE_DURATION = 30 * 60 * 1000;
 
-        function getCache(key) {
+        function getCache(key, duration) {
             const cached = localStorage.getItem(key);
             if (!cached) return null;
             const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp > CACHE_DURATION) {
+            const maxAge = duration || CACHE_DURATION;
+            if (Date.now() - timestamp > maxAge) {
                 localStorage.removeItem(key);
                 return null;
             }
@@ -1112,21 +1114,26 @@
         async function loadData() {
             showScreen('loadingScreen');
 
-            // Events can be cached (change rarely)
-            // Students always fetched fresh so Aeries sync changes appear immediately
+            // Students cached for 30 min; events cached for 5 hours
+            const cachedStudents = getCache('students', STUDENT_CACHE_DURATION);
             const cachedEvents = getCache('events');
 
             try {
-                const studentsRes = await api('getStudents');
-                allStudents = studentsRes.success ? studentsRes.data : [];
+                // Fetch whatever isn't cached in parallel
+                const [studentsRes, eventsRes] = await Promise.all([
+                    cachedStudents
+                        ? Promise.resolve({ success: true, data: cachedStudents })
+                        : api('getStudents'),
+                    cachedEvents
+                        ? Promise.resolve({ success: true, data: cachedEvents })
+                        : api('getEvents')
+                ]);
 
-                if (cachedEvents) {
-                    allEvents = cachedEvents;
-                } else {
-                    const eventsRes = await api('getEvents');
-                    allEvents = eventsRes.success ? eventsRes.data : [];
-                    setCache('events', allEvents);
-                }
+                allStudents = studentsRes.success ? studentsRes.data : [];
+                allEvents   = eventsRes.success   ? eventsRes.data   : [];
+
+                if (!cachedStudents) setCache('students', allStudents);
+                if (!cachedEvents)   setCache('events', allEvents);
             } catch (error) {
                 console.error('Error loading data:', error);
                 showError('Failed to load data. Please try again.');
