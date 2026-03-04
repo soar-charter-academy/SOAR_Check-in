@@ -1711,40 +1711,64 @@ SOAR Administration</textarea>
             await loadData();
         }
 
-        function exportData() {
-            if (filteredCheckins.length === 0) {
-                alert('No data to export');
-                return;
+        async function exportData() {
+            // Show loading indicator
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Fetching all data...';
+            btn.disabled = true;
+            
+            try {
+                // Fetch ALL check-ins (no date restrictions)
+                const res = await api('getCheckins', {});
+                
+                if (!res.success || !res.data || res.data.length === 0) {
+                    alert('No data to export');
+                    return;
+                }
+                
+                const allCheckinsForExport = res.data;
+                
+                // Update button to show progress
+                btn.textContent = `↓ Exporting ${allCheckinsForExport.length} check-ins...`;
+
+                // Create CSV
+                const headers = ['Date', 'Time', 'Student Name', 'Student ID', 'Grade', 'Event', 'Parent Email'];
+                const rows = allCheckinsForExport.map(checkin => {
+                    const date = new Date(checkin.timestamp);
+                    return [
+                        date.toLocaleDateString(),
+                        date.toLocaleTimeString(),
+                        checkin.studentName,
+                        checkin.studentId || '',
+                        checkin.grade,
+                        checkin.eventName,
+                        checkin.parentEmail
+                    ];
+                });
+
+                const csv = [
+                    headers.join(','),
+                    ...rows.map(row => row.map(field => `"${field}"`).join(','))
+                ].join('\n');
+
+                // Download
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `soar-all-checkins-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Failed to export data: ' + error.message);
+            } finally {
+                // Restore button
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
-
-            // Create CSV
-            const headers = ['Date', 'Time', 'Student Name', 'Student ID', 'Grade', 'Event', 'Parent Email'];
-            const rows = filteredCheckins.map(checkin => {
-                const date = new Date(checkin.timestamp);
-                return [
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    checkin.studentName,
-                    checkin.studentId || '',
-                    checkin.grade,
-                    checkin.eventName,
-                    checkin.parentEmail
-                ];
-            });
-
-            const csv = [
-                headers.join(','),
-                ...rows.map(row => row.map(field => `"${field}"`).join(','))
-            ].join('\n');
-
-            // Download
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `soar-checkins-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
         }
 
         function showLoading(show) {
