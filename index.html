@@ -1563,15 +1563,28 @@
             });
         }
 
+        let isSubmitting = false; // Prevent double-clicks
+        
         async function checkIn(eventId) {
+            // CRITICAL: Prevent double-clicks
+            if (isSubmitting) {
+                console.log('Already submitting, ignoring click');
+                return;
+            }
+            
             if (selectedStudentIds.length === 0) {
                 showError('Please select at least one student');
                 return;
             }
+            
+            isSubmitting = true;
 
             const students = allStudents.filter(s => selectedStudentIds.includes(s.id));
             const event = allEvents.find(e => e.id === eventId);
-            if (!students.length || !event) return;
+            if (!students.length || !event) {
+                isSubmitting = false; // Reset flag
+                return;
+            }
 
             try {
                 const today = new Date().toISOString().split('T')[0];
@@ -1600,6 +1613,7 @@
                     
                     if (studentsToCheckIn.length === 0) {
                         alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
+                        isSubmitting = false; // Reset flag
                         return;
                     } else {
                         alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
@@ -1640,11 +1654,13 @@
                 document.getElementById('successEventName').textContent = event.name;
                 document.getElementById('successFamilyTotal').textContent = familyTotal;
                 
+                isSubmitting = false; // Reset flag before showing success
                 showScreen('successScreen');
 
             } catch (error) {
                 console.error('Error checking in:', error);
                 showError('Failed to check in. Please try again.');
+                isSubmitting = false; // Reset flag on error
                 showCheckinScreen();
             }
         }
