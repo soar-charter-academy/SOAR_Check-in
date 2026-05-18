@@ -1212,6 +1212,16 @@ SOAR Administration</textarea>
                             <button class="tag-btn" onclick="insertTag('{SCHOOL_YEAR}')">School Year</button>
                         </div>
                     </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label">Attachments (optional)</label>
+                        <input type="file" id="emailAttachments" multiple
+                            style="padding: 8px 12px; border: 2px dashed var(--border); border-radius: 8px; width: 100%; cursor: pointer; background: var(--bg);">
+                        <div id="attachmentList" style="margin-top: 8px; display: none;">
+                            <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 4px;">Files to attach:</p>
+                            <div id="attachmentItems"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Preview -->
@@ -2370,14 +2380,66 @@ SOAR Administration</textarea>
             document.getElementById('previewBody').textContent = personalizedMessage;
         }
 
+        // Handle attachment file selection — show file list preview
+        document.getElementById('emailAttachments').addEventListener('change', function() {
+            const files = Array.from(this.files);
+            const listDiv = document.getElementById('attachmentList');
+            const itemsDiv = document.getElementById('attachmentItems');
+
+            if (files.length === 0) {
+                listDiv.style.display = 'none';
+                return;
+            }
+
+            listDiv.style.display = 'block';
+            itemsDiv.innerHTML = files.map(f => `
+                <div style="font-size: 0.85rem; padding: 4px 8px; background: var(--bg); border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                    <span>📎 ${f.name}</span>
+                    <span style="color: var(--text-light);">${(f.size / 1024).toFixed(1)} KB</span>
+                </div>
+            `).join('');
+        });
+
+        // Convert a File object to a base64 string
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = () => reject(new Error('Failed to read file: ' + file.name));
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function sendEmails() {
             if (campaignRecipients.length === 0) {
                 alert('No recipients to send to');
                 return;
             }
 
+            // Read and encode any attached files before sending
+            const attachmentInput = document.getElementById('emailAttachments');
+            const attachmentFiles = Array.from(attachmentInput.files);
+            let attachments = [];
+
+            if (attachmentFiles.length > 0) {
+                try {
+                    attachments = await Promise.all(attachmentFiles.map(async (file) => ({
+                        filename: file.name,
+                        mimeType: file.type || 'application/octet-stream',
+                        data: await fileToBase64(file)
+                    })));
+                } catch (err) {
+                    alert('Error reading attachment: ' + err.message);
+                    return;
+                }
+            }
+
+            const attachmentNote = attachments.length > 0
+                ? `\n\nAttachments: ${attachments.map(a => a.filename).join(', ')}`
+                : '';
+
             const confirmed = confirm(
-                `You are about to send ${campaignRecipients.length} emails.\n\n` +
+                `You are about to send ${campaignRecipients.length} emails.${attachmentNote}\n\n` +
                 `This action cannot be undone. Continue?`
             );
             
@@ -2412,7 +2474,7 @@ SOAR Administration</textarea>
                 
                 try {
                     // Send email via Firebase Functions + SendGrid
-                    await simulateEmailSend(recipient.email, subject, personalizedMessage);
+                    await simulateEmailSend(recipient.email, subject, personalizedMessage, attachments);
                     successCount++;
                 } catch (error) {
                     console.error('Error sending to', recipient.email, error);
@@ -2444,22 +2506,25 @@ SOAR Administration</textarea>
         }
 
         // Send email using Google Apps Script
-        async function simulateEmailSend(to, subject, body) {
+        async function simulateEmailSend(to, subject, body, attachments = []) {
             try {
+                const payload = {
+                    action: 'sendEmails',
+                    emails: [{
+                        to: to,
+                        subject: subject,
+                        body: body,
+                        attachments: attachments   // array of {filename, mimeType, data}
+                    }]
+                };
+
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors', // Required for Google Apps Script
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        action: 'sendEmails',
-                        emails: [{
-                            to: to,
-                            subject: subject,
-                            body: body
-                        }]
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 // Note: no-cors mode means we can't read the response
