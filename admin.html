@@ -1025,6 +1025,9 @@
             <span class="last-sync" id="lastSync">Last sync: Loading...</span>
             <button class="btn btn-secondary" onclick="loadDataWithEmails()">↻ Refresh</button>
             <button class="btn btn-primary" onclick="exportData()">↓ Export CSV</button>
+            <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">↑ Upload CSV</button>
+            <button class="btn" style="background: #DC2626; color: white;" onclick="deleteAllCheckins()">🗑️ Delete All</button>
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
         </div>
     </div>
 
@@ -1711,40 +1714,224 @@ SOAR Administration</textarea>
             await loadData();
         }
 
-        function exportData() {
-            if (filteredCheckins.length === 0) {
-                alert('No data to export');
+        async function exportData() {
+            // Show loading indicator
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Fetching all data...';
+            btn.disabled = true;
+            
+            try {
+                // Fetch ALL check-ins (no date restrictions)
+                const res = await api('getCheckins', {});
+                
+                if (!res.success || !res.data || res.data.length === 0) {
+                    alert('No data to export');
+                    return;
+                }
+                
+                const allCheckinsForExport = res.data;
+                
+                // Update button to show progress
+                btn.textContent = `↓ Exporting ${allCheckinsForExport.length} check-ins...`;
+
+                // Create CSV
+                const headers = ['Date', 'Time', 'Student Name', 'Student ID', 'Grade', 'Event', 'Parent Email'];
+                const rows = allCheckinsForExport.map(checkin => {
+                    const date = new Date(checkin.timestamp);
+                    return [
+                        date.toLocaleDateString(),
+                        date.toLocaleTimeString(),
+                        checkin.studentName,
+                        checkin.studentId || '',
+                        checkin.grade,
+                        checkin.eventName,
+                        checkin.parentEmail
+                    ];
+                });
+
+                const csv = [
+                    headers.join(','),
+                    ...rows.map(row => row.map(field => `"${field}"`).join(','))
+                ].join('\n');
+
+                // Download
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `soar-all-checkins-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Failed to export data: ' + error.message);
+            } finally {
+                // Restore button
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteAllCheckins() {
+            // Triple confirmation for safety
+            const confirm1 = confirm('⚠️ WARNING: This will DELETE ALL check-ins from the database!\n\nThis action CANNOT be undone.\n\nAre you absolutely sure?');
+            if (!confirm1) return;
+            
+            const confirm2 = confirm('⚠️ FINAL WARNING: ALL check-in history will be permanently deleted.\n\nType YES in the next prompt to continue.');
+            if (!confirm2) return;
+            
+            const confirm3 = prompt('Type "DELETE ALL" (in capital letters) to confirm:');
+            if (confirm3 !== 'DELETE ALL') {
+                alert('Deletion cancelled.');
                 return;
             }
+            
+            try {
+                const res = await api('deleteAllCheckins');
+                if (res.success) {
+                    alert('✅ All check-ins deleted successfully.');
+                    await loadData();
+                } else {
+                    alert('Failed to delete check-ins: ' + (res.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Failed to delete check-ins: ' + error.message);
+            }
+        }
 
-            // Create CSV
-            const headers = ['Date', 'Time', 'Student Name', 'Student ID', 'Grade', 'Event', 'Parent Email'];
-            const rows = filteredCheckins.map(checkin => {
-                const date = new Date(checkin.timestamp);
-                return [
-                    date.toLocaleDateString(),
-                    date.toLocaleTimeString(),
-                    checkin.studentName,
-                    checkin.studentId || '',
-                    checkin.grade,
-                    checkin.eventName,
-                    checkin.parentEmail
-                ];
-            });
-
-            const csv = [
-                headers.join(','),
-                ...rows.map(row => row.map(field => `"${field}"`).join(','))
-            ].join('\n');
-
-            // Download
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `soar-checkins-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+        async function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.name.endsWith('.csv')) {
+                alert('Please upload a CSV file');
+                return;
+            }
+            
+            try {
+                const text = await file.text();
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    alert('CSV file is empty or has no data rows');
+                    return;
+                }
+                
+                // Parse CSV
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                const checkins = [];
+                
+                // Expected columns: Date, Time, Student ID, Student Name, Grade, Event, Parent Email
+                const dateIdx = headers.findIndex(h => h.toLowerCase().includes('date'));
+                const timeIdx = headers.findIndex(h => h.toLowerCase().includes('time'));
+                const studentIdIdx = headers.findIndex(h => h.toLowerCase().includes('student id'));
+                const studentNameIdx = headers.findIndex(h => h.toLowerCase().includes('student name'));
+                const gradeIdx = headers.findIndex(h => h.toLowerCase().includes('grade'));
+                const eventIdx = headers.findIndex(h => h.toLowerCase().includes('event'));
+                const emailIdx = headers.findIndex(h => h.toLowerCase().includes('email'));
+                
+                if (dateIdx === -1 || timeIdx === -1 || studentIdIdx === -1 || studentNameIdx === -1) {
+                    alert('CSV must have columns: Date, Time, Student ID, Student Name, Grade, Event, Parent Email');
+                    return;
+                }
+                
+                // Parse data rows
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (!line.trim()) continue;
+                    
+                    // Simple CSV parsing (handles quoted fields)
+                    const cols = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let char of line) {
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            cols.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    cols.push(current.trim());
+                    
+                    if (cols.length < headers.length) continue;
+                    
+                    const dateStr = cols[dateIdx].replace(/"/g, '');
+                    const timeStr = cols[timeIdx].replace(/"/g, '');
+                    const studentId = cols[studentIdIdx].replace(/"/g, '');
+                    const studentName = cols[studentNameIdx].replace(/"/g, '');
+                    const grade = cols[gradeIdx].replace(/"/g, '');
+                    const eventName = cols[eventIdx].replace(/"/g, '');
+                    const parentEmail = emailIdx !== -1 ? cols[emailIdx].replace(/"/g, '') : '';
+                    
+                    // Parse timestamp from date and time
+                    const timestamp = new Date(dateStr + ' ' + timeStr).getTime();
+                    
+                    if (isNaN(timestamp)) {
+                        console.warn('Invalid date/time on row ' + (i + 1) + ': ' + dateStr + ' ' + timeStr);
+                        continue;
+                    }
+                    
+                    // Find student by ID to get familyKey
+                    const student = allStudents.find(s => s.studentId?.toString() === studentId.toString());
+                    
+                    checkins.push({
+                        timestamp,
+                        studentId,
+                        studentName,
+                        grade,
+                        eventName,
+                        parentEmail,
+                        familyKey: student ? student.familyKey : studentId,
+                        eventId: 'csv_import',
+                        userId: 'csv_import'
+                    });
+                }
+                
+                if (checkins.length === 0) {
+                    alert('No valid check-ins found in CSV');
+                    return;
+                }
+                
+                // Confirm upload
+                const confirm = window.confirm(`Upload ${checkins.length} check-ins from CSV?\n\nThis will ADD to existing check-ins.`);
+                if (!confirm) return;
+                
+                // Upload in batches
+                const batchSize = 100;
+                let uploaded = 0;
+                
+                for (let i = 0; i < checkins.length; i += batchSize) {
+                    const batch = checkins.slice(i, i + batchSize);
+                    const res = await api('uploadCheckins', { 
+                        data: JSON.stringify({ checkins: batch })
+                    });
+                    
+                    if (!res.success) {
+                        alert('Upload failed at batch ' + (i / batchSize + 1) + ': ' + res.error);
+                        break;
+                    }
+                    
+                    uploaded += batch.length;
+                    console.log(`Uploaded ${uploaded} / ${checkins.length}`);
+                }
+                
+                alert(`✅ Successfully uploaded ${uploaded} check-ins!`);
+                await loadData();
+                
+            } catch (error) {
+                console.error('CSV upload error:', error);
+                alert('Failed to process CSV: ' + error.message);
+            } finally {
+                // Reset file input
+                event.target.value = '';
+            }
         }
 
         function showLoading(show) {
