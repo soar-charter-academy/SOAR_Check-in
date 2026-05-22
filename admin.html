@@ -1542,7 +1542,7 @@ SOAR Administration</textarea>
                 const familyKey = student.familyKey;
                 if (!familyKey || familyKey === '') return; // Skip students without family key
                 
-                const count = studentCounts['STU_' + student.studentId] || studentCounts[student.id] || 0;
+                const count = studentCounts[student.id.replace('STU_', '')] || 0;
                 
                 // For each family, store the max count (since siblings should be equalized)
                 if (!familyCounts[familyKey]) {
