@@ -1588,72 +1588,57 @@
 
             try {
                 const today = new Date().toISOString().split('T')[0];
-                
-                // Check for existing check-ins today via API
-                const studentIds = students.map(s => s.id).join(',');
-                const checkRes = await api('checkDailyCheckins', { studentIds, date: today });
-                const alreadyCheckedInMap = checkRes.success ? checkRes.data : {};
-                
-                // Filter out students who already checked in
-                const alreadyCheckedIn = [];
-                const studentsToCheckIn = [];
-                
-                students.forEach(student => {
-                    if (alreadyCheckedInMap[student.id]) {
-                        alreadyCheckedIn.push(student);
-                    } else {
-                        studentsToCheckIn.push(student);
-                    }
-                });
-                
-                // Show warning if some students already checked in
-                if (alreadyCheckedIn.length > 0) {
-                    const names = alreadyCheckedIn.map(s => s.firstName).join(', ');
-                    const wasWere = alreadyCheckedIn.length === 1 ? 'was' : 'were';
-                    
-                    if (studentsToCheckIn.length === 0) {
-                        alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
-                        isSubmitting = false; // Reset flag
-                        return;
-                    } else {
-                        alert(`Note: ${names} ${wasWere} already checked in today.\n\nWe'll check in the other students.`);
-                    }
-                }
-                
-                // Show loading screen
+
+                // Show loading screen immediately — one round trip total now
                 showScreen('loadingScreen');
-                
-                // Submit via API
+
+                // Single combined call: backend checks for existing check-ins
+                // AND submits in the same request/response cycle.
                 const checkinPayload = {
-                    students: studentsToCheckIn,
+                    students: students,
                     eventName: event.name,
                     eventId: event.id,
                     parentEmail: currentUser.email,
-                    userId: currentUser.uid
+                    userId: currentUser.uid,
+                    date: today
                 };
 
                 const result = await api('submitCheckin', { data: JSON.stringify(checkinPayload) });
-                
+
                 if (!result.success) throw new Error(result.error || 'Check-in failed');
-                
+
+                // Backend now returns which students were actually checked in
+                // vs. which were skipped because they already checked in today.
+                const studentsToCheckIn = result.checkedIn || students;
+                const alreadyCheckedIn = result.alreadyCheckedIn || [];
+
+                if (studentsToCheckIn.length === 0 && alreadyCheckedIn.length > 0) {
+                    const names = alreadyCheckedIn.map(s => s.firstName).join(', ');
+                    const wasWere = alreadyCheckedIn.length === 1 ? 'was' : 'were';
+                    alert(`⚠️ ${names} ${wasWere} already checked in today!\n\nEach student can only check in once per day.`);
+                    isSubmitting = false;
+                    showScreen('checkinScreen'); // back out of loading screen
+                    return;
+                }
+
                 const familyTotal = result.familyTotal || 0;
 
                 // Show success with names of students who were checked in
-                const successNames = studentsToCheckIn.length === 1 
+                const successNames = studentsToCheckIn.length === 1
                     ? `${studentsToCheckIn[0].firstName} ${studentsToCheckIn[0].lastName}`
                     : studentsToCheckIn.map(s => s.firstName).join(', ');
-                
+
                 // Add note if some were skipped
                 let successDetail = `<strong>${successNames}</strong>`;
                 if (alreadyCheckedIn.length > 0) {
                     const skippedNames = alreadyCheckedIn.map(s => s.firstName).join(', ');
                     successDetail += `<br/><small style="color: var(--text-light); font-size: 0.9rem;">(${skippedNames} already checked in today)</small>`;
                 }
-                
+
                 document.getElementById('successStudentNames').innerHTML = successDetail;
                 document.getElementById('successEventName').textContent = event.name;
                 document.getElementById('successFamilyTotal').textContent = familyTotal;
-                
+
                 isSubmitting = false; // Reset flag before showing success
                 showScreen('successScreen');
 
